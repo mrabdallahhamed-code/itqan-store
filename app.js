@@ -42,22 +42,33 @@ function statusLabel(status) {
   return map[status] || status;
 }
 
+function setMeta(title, description) {
+  document.title = title;
+  let m = document.querySelector('meta[name="description"]');
+  if (m && description) m.setAttribute("content", description);
+}
+
 function layout(content) {
   app.innerHTML = `
     <header class="site-header">
       <div class="wrap">
-        <a href="#/" class="brand">اتقان <span>| المتجر</span></a>
+        <a href="#/" class="brand">
+          <span class="logo-chip"><img src="logo.png" alt="شعار اتقان لخدمات الأعمال"></span>
+          <span class="brand-text">اتقان<small>دراسات جدوى واستشارات أعمال</small></span>
+        </a>
         <nav class="nav-links">
           <a href="#/">الرئيسية</a>
           <a href="#/store">المتجر</a>
           <a href="#/track">تتبع طلبك</a>
+          <a href="#/store" class="btn btn-primary">تصفّح الدراسات</a>
         </nav>
       </div>
     </header>
     <main>${content}</main>
     <footer class="site-footer">
       <div class="wrap">
-        متجر دراسات الجدوى — تابع لـ <a href="https://itqanbs.sa" target="_blank">اتقان لخدمات الأعمال</a>
+        متجر دراسات الجدوى والنماذج المالية الجاهزة — تابع لـ <a href="https://itqanbs.sa" target="_blank" rel="noopener">اتقان لخدمات الأعمال</a><br>
+        © ${new Date().getFullYear()} جميع الحقوق محفوظة.
       </div>
     </footer>
   `;
@@ -76,11 +87,24 @@ function productCardHtml(p) {
 
 // ---------------- Home ----------------
 async function renderHome() {
+  setMeta(
+    "متجر اتقان | دراسات جدوى جاهزة وموثوقة للمستثمرين",
+    "دراسات جدوى ودراسات سوق ونماذج مالية جاهزة من اتقان لخدمات الأعمال. تحليل دقيق يساعدك تتخذ قرار الاستثمار بثقة."
+  );
   layout(`
     <section class="hero">
       <div class="wrap">
-        <h1>دراسات وأدوات تساعدك على اتخاذ القرار</h1>
-        <p>منتجات ودراسات استشارية من اتقان لمساعدة المستثمرين وأصحاب المشاريع على تقييم الفرص واتخاذ قراراتهم بناءً على معلومات وتحليلات واضحة.</p>
+        <h1>لا تستثمر على تخمين — استثمر على دراسة</h1>
+        <p>دراسات جدوى ونماذج مالية جاهزة من اتقان لخدمات الأعمال، معدّة باحتراف لتساعدك تقيّم فرصتك الاستثمارية وتتخذ قرارك بثقة وأرقام واضحة — تصل إليك إلكترونيًا خلال دقائق من اعتماد الطلب.</p>
+        <a href="#/store" class="btn btn-primary" style="width:auto;display:inline-block;margin-top:24px;padding:13px 28px;">تصفّح الدراسات المتاحة</a>
+      </div>
+    </section>
+    <section class="trust-strip">
+      <div class="wrap">
+        <div class="trust-item"><span class="dot">✓</span> دراسات معدّة من فريق استشاري متخصص</div>
+        <div class="trust-item"><span class="dot">✓</span> تحليل سوقي ومالي وتشغيلي كامل</div>
+        <div class="trust-item"><span class="dot">✓</span> عينة مجانية قبل الشراء</div>
+        <div class="trust-item"><span class="dot">✓</span> تسليم إلكتروني فوري بعد اعتماد السداد</div>
       </div>
     </section>
     <div class="wrap">
@@ -107,6 +131,10 @@ async function renderHome() {
 
 // ---------------- Store ----------------
 async function renderStore() {
+  setMeta(
+    "المتجر | كل دراسات الجدوى — اتقان",
+    "تصفّح كل دراسات الجدوى ودراسات السوق والنماذج المالية الجاهزة من اتقان لخدمات الأعمال."
+  );
   layout(`
     <div class="wrap">
       <div class="section-heading" style="margin-top:40px;">
@@ -152,6 +180,10 @@ async function renderProduct(id) {
   }
 
   const contents = Array.isArray(p.contents) ? p.contents : [];
+  setMeta(
+    `${p.title} | اتقان`,
+    (p.short_description || p.full_description || "").slice(0, 155)
+  );
   const sampleUrl = p.sample_file_path
     ? sb.storage.from("product-samples").getPublicUrl(p.sample_file_path).data.publicUrl
     : null;
@@ -181,7 +213,8 @@ async function renderProduct(id) {
             <li>— النموذج المالي (إن وُجد ضمن المنتج)</li>
             <li>— تسليم إلكتروني فوري بعد اعتماد السداد</li>
           </ul>
-          <a class="btn btn-primary" href="#/order/${p.id}">اطلب الدراسة</a>
+          <a class="btn btn-primary" href="#/order/${p.id}">اطلب الدراسة الآن</a>
+          <p style="font-size:12.5px;color:var(--slate);text-align:center;margin-top:10px;">دفع آمن عبر تحويل بنكي مباشر لحساب اتقان</p>
         </div>
       </div>
     </div>
