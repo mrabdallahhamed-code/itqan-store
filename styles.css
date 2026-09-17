@@ -359,6 +359,24 @@ a { color: inherit; text-decoration: none; }
 .notice.error { border-color: var(--alert); color: var(--alert); background: #FBEEEA; }
 .notice.success { border-color: var(--success); color: var(--success); background: #EDF5EF; }
 
+.wa-float {
+  position: fixed;
+  bottom: 22px;
+  left: 22px;
+  background: #25D366;
+  color: #fff;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  z-index: 30;
+  font-size: 26px;
+}
+.wa-float:hover { background: #1EBE5A; }
+
 .center-page {
   max-width: 520px;
   margin: 0 auto;

@@ -13,5 +13,5 @@ window.ITQAN_CONFIG = {
     iban: "SA00 0000 0000 0000 0000 0000",
   },
 
-  whatsappSupportNumber: "9665XXXXXXXX", // بدون + أو صفر البداية
+  whatsappSupportNumber: "966569051686", // بدون + أو صفر البداية
 };

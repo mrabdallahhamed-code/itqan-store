@@ -248,10 +248,10 @@ async function renderOrderDetail(orderId) {
               <button class="btn btn-danger" id="rejectBtn">رفض الإثبات</button>
             </div>` : ""}
           ${canDeliver ? `
-            <p style="font-size:13.5px;color:var(--slate);margin-top:12px;">السداد معتمد. ولّد رابط تحميل آمن وأرسله للعميل يدويًا عبر البريد، ثم ضع الطلب كمُسلَّم.</p>
+            <p style="font-size:13.5px;color:var(--slate);margin-top:12px;">السداد معتمد. تقدر ترسل الدراسة تلقائيًا بالبريد، أو تولّد رابط تحميل وترسله بنفسك يدويًا.</p>
             <div class="action-row">
-              <button class="btn btn-primary" id="genLinkBtn" style="width:auto;">توليد رابط تحميل</button>
-              <button class="btn btn-success" id="deliverBtn" style="width:auto;">تحديد كمُسلَّم</button>
+              <button class="btn btn-success" id="autoSendBtn" style="width:auto;">إرسال الدراسة تلقائيًا بالبريد</button>
+              <button class="btn btn-ghost" id="genLinkBtn" style="width:auto;">توليد رابط يدوي فقط</button>
             </div>
             <div id="linkBox"></div>
           ` : ""}
@@ -263,6 +263,7 @@ async function renderOrderDetail(orderId) {
 
   document.getElementById("approveBtn")?.addEventListener("click", async () => {
     await updateOrderStatus(orderId, "payment_approved", "approved");
+    sb.functions.invoke("send-order-email", { body: { order_id: orderId, event: "payment_approved" } }).catch(() => {});
     location.hash = "#/orders/" + orderId;
     route();
   });
@@ -271,6 +272,24 @@ async function renderOrderDetail(orderId) {
     if (reason === null) return;
     await sb.from("orders").update({ status: "rejected", rejection_reason: reason }).eq("id", orderId);
     await sb.from("order_events").insert({ order_id: orderId, event: "rejected", actor: "admin", details: reason });
+    sb.functions.invoke("send-order-email", { body: { order_id: orderId, event: "rejected", reason } }).catch(() => {});
+    route();
+  });
+  document.getElementById("autoSendBtn")?.addEventListener("click", async (e) => {
+    const btn = e.target;
+    btn.disabled = true; btn.textContent = "جارِ الإرسال…";
+    const { data, error } = await sb.functions.invoke("send-order-email", { body: { order_id: orderId, event: "delivered" } });
+    if (error || data?.error) {
+      document.getElementById("linkBox").innerHTML = `<div class="notice error">تعذّر إرسال البريد تلقائيًا. تأكد أن مفتاح Resend مضاف، أو استخدم "توليد رابط يدوي فقط".</div>`;
+      btn.disabled = false; btn.textContent = "إرسال الدراسة تلقائيًا بالبريد";
+      return;
+    }
+    if (data?.skipped) {
+      document.getElementById("linkBox").innerHTML = `<div class="notice">لم يتم إرسال بريد — مفتاح Resend غير مضاف بعد. استخدم "توليد رابط يدوي فقط" حاليًا.</div>`;
+      btn.disabled = false; btn.textContent = "إرسال الدراسة تلقائيًا بالبريد";
+      return;
+    }
+    await updateOrderStatus(orderId, "delivered", "delivered");
     route();
   });
   document.getElementById("genLinkBtn")?.addEventListener("click", async () => {
@@ -285,15 +304,16 @@ async function renderOrderDetail(orderId) {
         <button class="btn btn-ghost" id="copyLinkBtn">نسخ</button>
       </div>
       <small style="color:var(--slate);">الرابط صالح لمدة 7 أيام</small>
+      <div class="action-row"><button class="btn btn-success" id="manualDeliverBtn" style="width:auto;">تحديد كمُسلَّم بعد الإرسال اليدوي</button></div>
     `;
     document.getElementById("copyLinkBtn").addEventListener("click", () => {
       document.getElementById("linkInput").select();
       navigator.clipboard.writeText(signed.signedUrl);
     });
-  });
-  document.getElementById("deliverBtn")?.addEventListener("click", async () => {
-    await updateOrderStatus(orderId, "delivered", "delivered");
-    route();
+    document.getElementById("manualDeliverBtn").addEventListener("click", async () => {
+      await updateOrderStatus(orderId, "delivered", "delivered");
+      route();
+    });
   });
 }
 
