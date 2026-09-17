@@ -280,7 +280,11 @@ async function renderOrderDetail(orderId) {
     btn.disabled = true; btn.textContent = "جارِ الإرسال…";
     const { data, error } = await sb.functions.invoke("send-order-email", { body: { order_id: orderId, event: "delivered" } });
     if (error || data?.error) {
-      document.getElementById("linkBox").innerHTML = `<div class="notice error">تعذّر إرسال البريد تلقائيًا. تأكد أن مفتاح Resend مضاف، أو استخدم "توليد رابط يدوي فقط".</div>`;
+      let detail = data?.error || error?.message || "خطأ غير معروف";
+      if (error?.context && typeof error.context.json === "function") {
+        try { const body = await error.context.json(); if (body?.error) detail = body.error; } catch (_) {}
+      }
+      document.getElementById("linkBox").innerHTML = `<div class="notice error">تعذّر إرسال البريد تلقائيًا: ${detail}</div>`;
       btn.disabled = false; btn.textContent = "إرسال الدراسة تلقائيًا بالبريد";
       return;
     }
