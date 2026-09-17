@@ -415,23 +415,24 @@ async function renderProductForm(admin, productId) {
       const slug = fd.get("slug").trim();
       let study_file_path = p.study_file_path, sample_file_path = p.sample_file_path, cover_image_path = p.cover_image_path;
 
+      const safeExt = (name) => (name.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "");
       const studyFile = document.getElementById("studyFile").files[0];
       if (studyFile) {
-        const path = `${slug}/${studyFile.name}`;
+        const path = `${slug}/study-${Date.now()}.${safeExt(studyFile.name)}`;
         const { error } = await sb.storage.from("product-files").upload(path, studyFile, { upsert: true });
         if (error) throw error;
         study_file_path = path;
       }
       const sampleFile = document.getElementById("sampleFile").files[0];
       if (sampleFile) {
-        const path = `${slug}/${sampleFile.name}`;
+        const path = `${slug}/sample-${Date.now()}.${safeExt(sampleFile.name)}`;
         const { error } = await sb.storage.from("product-samples").upload(path, sampleFile, { upsert: true });
         if (error) throw error;
         sample_file_path = path;
       }
       const coverFile = document.getElementById("coverFile").files[0];
       if (coverFile) {
-        const path = `${slug}/${coverFile.name}`;
+        const path = `${slug}/cover-${Date.now()}.${safeExt(coverFile.name)}`;
         const { error } = await sb.storage.from("product-covers").upload(path, coverFile, { upsert: true });
         if (error) throw error;
         cover_image_path = path;

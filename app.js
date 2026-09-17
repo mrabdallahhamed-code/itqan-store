@@ -331,7 +331,8 @@ async function renderPayment(orderId) {
     const file = fd.get("proof_file");
 
     try {
-      const path = `${currentOrder.order_id}/${Date.now()}-${file.name}`;
+      const ext = (file.name.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "");
+      const path = `${currentOrder.order_id}/${Date.now()}.${ext}`;
       const { error: upErr } = await sb.storage.from("payment-proofs").upload(path, file);
       if (upErr) throw upErr;
 
