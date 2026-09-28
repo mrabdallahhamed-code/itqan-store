@@ -125,12 +125,14 @@ function layout(content) {
   `;
 }
 
-const serviceCard = (s) => `
-  <a class="product-card" href="#/service/${esc(s.slug)}">
-    ${icon(s.slug)}
-    <h3>${esc(s.title)}</h3>
-    <div class="desc">${esc(s.short_description)}</div>
-    <div class="price" style="color:var(--brass);font-weight:500;">تفاصيل الخدمة ←</div>
+const serviceRow = (s) => `
+  <a class="service-row" href="#/service/${esc(s.slug)}">
+    <span class="row-icon">${ICONS[s.slug] || ""}</span>
+    <span class="service-row-body">
+      <h3 class="service-row-title">${esc(s.title)}</h3>
+      <p class="service-row-desc">${esc(s.short_description)}</p>
+      <span class="service-row-cta">تفاصيل الخدمة وما تشمله ←</span>
+    </span>
   </a>`;
 
 const packageCard = (k) => `
@@ -199,7 +201,7 @@ async function renderHome() {
       </div>
 
       <div class="section-heading"><h2>خدماتنا</h2><a href="#/services" class="count">كل الخدمات ←</a></div>
-      <div id="homeServices" class="product-grid"><div class="loading">جارِ التحميل…</div></div>
+      <div id="homeServices" class="service-index"><div class="loading">جارِ التحميل…</div></div>
 
       <div class="section-heading"><h2>الباقات</h2><a href="#/packages" class="count">تفاصيل الباقات ←</a></div>
       <p class="note-muted">الخدمات توضح ماذا نقدّم، والباقات تجمع مجموعة خدمات تناسب مرحلة شركتك — بلا أسعار ثابتة، نحدد العرض بعد فهم احتياجك.</p>
@@ -234,7 +236,7 @@ async function renderHome() {
   const [services, packages] = await Promise.all([loadServices(), loadPackages()]);
   const sEl = document.getElementById("homeServices");
   const pEl = document.getElementById("homePackages");
-  if (sEl) sEl.innerHTML = services.length ? services.map(serviceCard).join("") : `<div class="empty-state">قريبًا.</div>`;
+  if (sEl) sEl.innerHTML = services.length ? services.map(serviceRow).join("") : `<div class="empty-state">قريبًا.</div>`;
   if (pEl) pEl.innerHTML = packages.length ? packages.map(packageCard).join("") : `<div class="empty-state">قريبًا.</div>`;
 
   document.getElementById("faqSection")?.querySelectorAll(".faq-item").forEach((item) => {
@@ -266,39 +268,67 @@ async function renderServices() {
   layout(`
     <div class="wrap">
       <div class="section-heading" style="margin-top:40px;"><h2>خدماتنا</h2></div>
-      <div id="list" class="product-grid"><div class="loading">جارِ التحميل…</div></div>
+      <p class="note-muted">اختر ما يناسب احتياجك، أو اطلب عرض سعر وسيساعدك فريقنا في التحديد.</p>
+      <div id="list" class="service-index"><div class="loading">جارِ التحميل…</div></div>
     </div>`);
   const services = await loadServices();
   document.getElementById("list").innerHTML = services.length
-    ? services.map(serviceCard).join("")
+    ? services.map(serviceRow).join("")
     : `<div class="empty-state">لا توجد خدمات منشورة حاليًا.</div>`;
 }
 
 async function renderService(slug) {
   layout(`<div class="wrap"><div class="loading">جارِ التحميل…</div></div>`);
-  const { data: s } = await sb.from("services").select("*").eq("slug", slug).eq("status", "published").maybeSingle();
+  const [{ data: s }, allServices] = await Promise.all([
+    sb.from("services").select("*").eq("slug", slug).eq("status", "published").maybeSingle(),
+    loadServices(),
+  ]);
   if (!s) {
     layout(`<div class="wrap"><div class="empty-state" style="margin-top:40px;">هذه الخدمة غير متاحة. <a href="#/services">عودة للخدمات</a></div></div>`);
     return;
   }
   setMeta(`${s.title} | اتقان`, (s.short_description || "").slice(0, 155));
+
+  const items = listItems(s);
+  const related = allServices.filter((x) => x.slug !== s.slug).slice(0, 3);
+
   layout(`
     <div class="wrap">
       <div class="product-detail">
         <div>
-          ${icon(s.slug)}
-          <div class="pd-cat">خدمات اتقان</div>
-          <h1 class="pd-title">${esc(s.title)}</h1>
-          <p class="pd-desc">${esc(s.full_description || s.short_description)}</p>
-          ${listItems(s).length ? `
+          <div class="breadcrumb"><a href="#/">الرئيسية</a><span class="sep">/</span><a href="#/services">الخدمات</a><span class="sep">/</span>${esc(s.title)}</div>
+          <span class="row-icon" style="display:inline-flex;width:44px;height:44px;">${ICONS[s.slug] || ""}</span>
+          <h1 class="pd-title" style="margin-top:14px;">${esc(s.title)}</h1>
+          <p class="service-lede">${esc(s.full_description || s.short_description)}</p>
+
+          ${items.length ? `
             <div class="pd-block">
-              <h4>ما تشمله الخدمة</h4>
-              <ul class="contents-list">${listItems(s).map((i) => `<li>${esc(i)}</li>`).join("")}</ul>
+              <h4>ما تحصل عليه</h4>
+              <div class="deliverables">${items.map((i) => `<div class="deliverable"><span class="tick">✓</span><span>${esc(i)}</span></div>`).join("")}</div>
+            </div>` : ""}
+
+          <div class="pd-block">
+            <h4>كيف نبدأ معك</h4>
+            <div class="mini-steps">
+              <div class="mini-step"><span class="n">١</span><span>تطلب عرض سعر وتوضح لنا هدفك من هذه الخدمة.</span></div>
+              <div class="mini-step"><span class="n">٢</span><span>نتواصل معك لفهم احتياجك بدقة ونحدد نطاق العمل المناسب.</span></div>
+              <div class="mini-step"><span class="n">٣</span><span>يصلك عرض سعر واضح، وبعد موافقتك يبدأ التنفيذ فورًا.</span></div>
+            </div>
+          </div>
+
+          ${related.length ? `
+            <div class="pd-block">
+              <h4>خدمات أخرى قد تهمك</h4>
+              <div class="related-row">${related.map((r) => `<a class="related-chip" href="#/service/${esc(r.slug)}">${esc(r.title)}</a>`).join("")}</div>
             </div>` : ""}
         </div>
         <div class="buy-box">
-          <h4 style="font-family:var(--font-display);margin:0 0 8px;">ابدأ بطلب عرض سعر</h4>
-          <p class="includes" style="margin-top:0;">نتواصل معك لفهم احتياجك، ثم يصلك عرض بنطاق عمل وسعر واضحين. طلب العرض لا يلزمك بشيء.</p>
+          <h4 style="font-family:var(--font-display);margin:0 0 14px;">ابدأ بطلب عرض سعر</h4>
+          <ul class="includes-check">
+            <li>عرض سعر واضح قبل أي التزام</li>
+            <li>نطاق عمل مخصص لاحتياجك</li>
+            <li>لا يبدأ العمل إلا بعد موافقتك</li>
+          </ul>
           <a class="btn btn-primary" href="#/request?service=${esc(s.slug)}">اطلب عرض سعر لهذه الخدمة</a>
         </div>
       </div>
