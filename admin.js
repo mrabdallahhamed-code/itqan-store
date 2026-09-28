@@ -7,26 +7,53 @@ const sb = createClient(window.ITQAN_CONFIG.supabaseUrl, window.ITQAN_CONFIG.sup
 const app = document.getElementById("app");
 document.body.classList.add("admin-body");
 
+// مهم: أي نص يدخله العميل يُعرض بعد تعقيمه حتى لا يُنفَّذ كود داخل اللوحة
+const esc = (v) =>
+  String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
 const STATUS_LABELS = {
-  pending_payment: "بانتظار السداد",
-  payment_proof_submitted: "إثبات مرفوع",
-  under_review: "قيد المراجعة",
-  payment_approved: "معتمد",
+  new: "جديد",
+  contacted: "تم التواصل",
+  quote_sent: "عرض السعر مُرسل",
+  quote_accepted: "العرض مقبول — بانتظار السداد",
+  payment_proof_submitted: "إثبات سداد للمراجعة",
+  payment_rejected: "إثبات مرفوض",
+  in_progress: "قيد التنفيذ",
   delivered: "تم التسليم",
-  rejected: "مرفوض",
+  declined: "مغلق",
   cancelled: "ملغي",
 };
 
-// ---------------- Auth guard ----------------
-let session = null;
+const EVENT_LABELS = {
+  created: "تم إنشاء الطلب",
+  contacted: "تم التواصل مع العميل",
+  quote_sent: "تم إرسال عرض السعر",
+  quote_accepted: "العميل وافق على العرض",
+  proof_submitted: "العميل رفع إثبات السداد",
+  payment_approved: "تم اعتماد السداد",
+  payment_rejected: "تم رفض إثبات السداد",
+  delivered: "تم التسليم",
+  declined: "تم إغلاق الطلب",
+  "email:request_received": "أُرسل بريد استلام الطلب للعميل",
+  "email:quote_sent": "أُرسل بريد عرض السعر للعميل",
+  "email:quote_accepted": "أُرسل بريد قبول العرض",
+  "email:payment_proof_received": "أُرسل بريد استلام الإثبات",
+  "email:payment_approved": "أُرسل بريد اعتماد السداد",
+  "email:payment_rejected": "أُرسل بريد رفض الإثبات",
+  "email:delivered": "أُرسل بريد التسليم",
+};
 
+let session = null;
+let flash = null; // {type:'success'|'error'|'warn', text}
+
+// ---------------- Auth ----------------
 window.addEventListener("DOMContentLoaded", init);
 window.addEventListener("hashchange", route);
 
 async function init() {
   const { data } = await sb.auth.getSession();
   session = data.session;
-  sb.auth.onAuthStateChange((_event, s) => { session = s; });
+  sb.auth.onAuthStateChange((_e, s) => { session = s; });
   route();
 }
 
@@ -37,31 +64,31 @@ async function isAdmin() {
   return data;
 }
 
-// ---------------- Router ----------------
 async function route() {
-  const hash = location.hash || "#/orders";
-
+  const hash = location.hash || "#/requests";
   if (!session) return renderLogin();
-
   const admin = await isAdmin();
   if (!admin) return renderLogin("هذا الحساب غير مصرّح له بالدخول للوحة التحكم.");
 
-  if (hash === "#/orders" || hash === "#/") return renderOrders(admin);
-  if (hash.startsWith("#/orders/")) return renderOrderDetail(hash.split("/")[2], admin);
-  if (hash === "#/products") return renderProducts(admin);
-  if (hash === "#/products/new") return renderProductForm(admin, null);
-  if (hash.startsWith("#/products/")) return renderProductForm(admin, hash.split("/")[2]);
-  return renderOrders(admin);
+  const parts = hash.split("/"); // ["#", "requests", "id"]
+  const section = parts[1];
+  const arg = parts[2];
+
+  if (section === "requests" && arg) return renderRequestDetail(arg);
+  if (section === "services" || section === "packages") {
+    if (arg) return renderContentForm(section, arg === "new" ? null : arg);
+    return renderContentList(section);
+  }
+  return renderRequests();
 }
 
-// ---------------- Login ----------------
 function renderLogin(errorMsg) {
   app.innerHTML = `
     <div class="login-screen">
       <div class="login-box">
         <div class="logo-chip"><img src="logo.png" alt="اتقان"></div>
         <h2>لوحة تحكم اتقان</h2>
-        ${errorMsg ? `<div class="notice error">${errorMsg}</div>` : ""}
+        ${errorMsg ? `<div class="notice error">${esc(errorMsg)}</div>` : ""}
         <div id="loginMsg"></div>
         <form id="loginForm">
           <div class="field"><label>البريد الإلكتروني</label><input required type="email" name="email"></div>
@@ -69,16 +96,13 @@ function renderLogin(errorMsg) {
           <button class="btn btn-primary" type="submit">دخول</button>
         </form>
       </div>
-    </div>
-  `;
+    </div>`;
   document.getElementById("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
     const btn = e.target.querySelector("button");
     btn.disabled = true; btn.textContent = "جارِ الدخول…";
-    const { data, error } = await sb.auth.signInWithPassword({
-      email: fd.get("email"), password: fd.get("password"),
-    });
+    const { data, error } = await sb.auth.signInWithPassword({ email: fd.get("email"), password: fd.get("password") });
     if (error) {
       document.getElementById("loginMsg").innerHTML = `<div class="notice error">بيانات الدخول غير صحيحة.</div>`;
       btn.disabled = false; btn.textContent = "دخول";
@@ -89,10 +113,9 @@ function renderLogin(errorMsg) {
   });
 }
 
-// ---------------- Shell (sidebar) ----------------
-function shell(activeKey, content) {
-  const hash = location.hash || "#/orders";
-  const isActive = (k) => hash.startsWith(k) ? "active" : "";
+function shell(content) {
+  const hash = location.hash || "#/requests";
+  const active = (k) => (hash.startsWith(k) ? "active" : "");
   app.innerHTML = `
     <div class="admin-shell">
       <aside class="admin-sidebar">
@@ -101,14 +124,14 @@ function shell(activeKey, content) {
           <span>لوحة تحكم اتقان</span>
         </div>
         <nav class="admin-nav">
-          <a href="#/orders" class="${isActive('#/orders')}">الطلبات</a>
-          <a href="#/products" class="${isActive('#/products')}">المنتجات</a>
+          <a href="#/requests" class="${active("#/requests")}">الطلبات</a>
+          <a href="#/services" class="${active("#/services")}">الخدمات</a>
+          <a href="#/packages" class="${active("#/packages")}">الباقات</a>
         </nav>
         <div class="signout"><button id="signOutBtn">تسجيل الخروج</button></div>
       </aside>
       <div class="admin-main">${content}</div>
-    </div>
-  `;
+    </div>`;
   document.getElementById("signOutBtn").addEventListener("click", async () => {
     await sb.auth.signOut();
     session = null;
@@ -116,360 +139,403 @@ function shell(activeKey, content) {
   });
 }
 
-// ---------------- Orders list ----------------
-async function renderOrders() {
-  shell("orders", `
+function flashHtml() {
+  if (!flash) return "";
+  const cls = flash.type === "error" ? "error" : flash.type === "success" ? "success" : "";
+  const html = `<div class="notice ${cls}">${esc(flash.text)}</div>`;
+  flash = null;
+  return html;
+}
+
+// ---------------- Requests list ----------------
+async function renderRequests() {
+  shell(`
     <div class="admin-header-row"><h1>الطلبات</h1></div>
     <div id="kpis" class="kpi-row"></div>
     <div id="tabs" class="status-tabs"></div>
-    <div id="ordersTableWrap"><div class="loading">جارِ التحميل…</div></div>
-  `);
+    <div id="wrap"><div class="loading">جارِ التحميل…</div></div>`);
 
   const { data, error } = await sb
-    .from("orders")
-    .select("id, order_number, amount, currency, status, created_at, customers(full_name, email, phone), products(title)")
+    .from("service_requests")
+    .select("id, request_number, full_name, status, source, created_at, services(title), packages(title)")
     .order("created_at", { ascending: false });
 
-  const wrap = document.getElementById("ordersTableWrap");
+  const wrap = document.getElementById("wrap");
   if (error) { wrap.innerHTML = `<div class="notice error">تعذّر تحميل الطلبات.</div>`; return; }
 
-  const counts = {};
-  data.forEach(o => counts[o.status] = (counts[o.status] || 0) + 1);
+  const c = {};
+  data.forEach((r) => (c[r.status] = (c[r.status] || 0) + 1));
   document.getElementById("kpis").innerHTML = `
-    <div class="kpi-card"><div class="num">${data.length}</div><div class="label">إجمالي الطلبات</div></div>
-    <div class="kpi-card"><div class="num">${(counts.payment_proof_submitted||0) + (counts.under_review||0)}</div><div class="label">بانتظار المراجعة</div></div>
-    <div class="kpi-card"><div class="num">${counts.payment_approved||0}</div><div class="label">معتمدة (بانتظار التسليم)</div></div>
-    <div class="kpi-card"><div class="num">${counts.delivered||0}</div><div class="label">تم تسليمها</div></div>
-  `;
+    <div class="kpi-card"><div class="num">${c.new || 0}</div><div class="label">طلبات جديدة</div></div>
+    <div class="kpi-card"><div class="num">${c.quote_sent || 0}</div><div class="label">بانتظار رد العميل على العرض</div></div>
+    <div class="kpi-card"><div class="num">${c.payment_proof_submitted || 0}</div><div class="label">إثباتات سداد للمراجعة</div></div>
+    <div class="kpi-card"><div class="num">${c.in_progress || 0}</div><div class="label">قيد التنفيذ</div></div>`;
 
-  const tabsEl = document.getElementById("tabs");
+  const tabs = document.getElementById("tabs");
   const statuses = ["", ...Object.keys(STATUS_LABELS)];
-  tabsEl.innerHTML = statuses.map(s => `<div class="chip ${s===''?'active':''}" data-status="${s}">${s ? STATUS_LABELS[s] : "الكل"}</div>`).join("");
+  tabs.innerHTML = statuses
+    .map((s) => `<div class="chip ${s === "" ? "active" : ""}" data-status="${s}">${s ? STATUS_LABELS[s] : "الكل"}${s ? ` (${c[s] || 0})` : ""}</div>`)
+    .join("");
 
-  function drawTable(filter) {
-    const list = filter ? data.filter(o => o.status === filter) : data;
+  const draw = (filter) => {
+    const list = filter ? data.filter((r) => r.status === filter) : data;
     if (!list.length) { wrap.innerHTML = `<div class="empty-state">لا توجد طلبات في هذا التصنيف.</div>`; return; }
     wrap.innerHTML = `
       <table class="data-table">
-        <thead><tr><th>رقم الطلب</th><th>العميل</th><th>المنتج</th><th>المبلغ</th><th>الحالة</th><th>التاريخ</th></tr></thead>
+        <thead><tr><th>رقم الطلب</th><th>العميل</th><th>الخدمة / الباقة</th><th>الحالة</th><th>المصدر</th><th>التاريخ</th></tr></thead>
         <tbody>
-          ${list.map(o => `
-            <tr data-id="${o.id}">
-              <td>${o.order_number}</td>
-              <td>${o.customers?.full_name || "—"}</td>
-              <td>${o.products?.title || "—"}</td>
-              <td>${Number(o.amount).toLocaleString("ar-SA")} ${o.currency}</td>
-              <td><span class="status-badge status-${o.status}">${STATUS_LABELS[o.status]}</span></td>
-              <td>${new Date(o.created_at).toLocaleDateString("ar-SA")}</td>
+          ${list.map((r) => `
+            <tr data-id="${esc(r.id)}">
+              <td>${esc(r.request_number)}</td>
+              <td>${esc(r.full_name)}</td>
+              <td>${esc([r.services?.title, r.packages?.title].filter(Boolean).join(" — ") || "—")}</td>
+              <td><span class="status-badge status-${esc(r.status)}">${esc(STATUS_LABELS[r.status] || r.status)}</span></td>
+              <td>${esc(r.source)}</td>
+              <td>${new Date(r.created_at).toLocaleDateString("ar-SA")}</td>
             </tr>`).join("")}
         </tbody>
-      </table>
-    `;
-    wrap.querySelectorAll("tr[data-id]").forEach(tr => {
-      tr.addEventListener("click", () => location.hash = `#/orders/${tr.dataset.id}`);
-    });
-  }
-  drawTable("");
-
-  tabsEl.addEventListener("click", (e) => {
+      </table>`;
+    wrap.querySelectorAll("tr[data-id]").forEach((tr) =>
+      tr.addEventListener("click", () => (location.hash = `#/requests/${tr.dataset.id}`))
+    );
+  };
+  draw("");
+  tabs.addEventListener("click", (e) => {
     const chip = e.target.closest(".chip");
     if (!chip) return;
-    [...tabsEl.children].forEach(c => c.classList.remove("active"));
+    [...tabs.children].forEach((x) => x.classList.remove("active"));
     chip.classList.add("active");
-    drawTable(chip.dataset.status);
+    draw(chip.dataset.status);
   });
 }
 
-// ---------------- Order detail ----------------
-async function renderOrderDetail(orderId) {
-  shell("orders", `<div class="loading">جارِ التحميل…</div>`);
+// ---------------- Request detail ----------------
+async function setStatus(id, status, eventName, details, fields = {}) {
+  const { error } = await sb.from("service_requests").update({ status, ...fields }).eq("id", id);
+  if (error) throw error;
+  await sb.from("request_events").insert({ request_id: id, event: eventName, actor: "admin", details: details || null });
+}
 
-  const { data: o, error } = await sb
-    .from("orders")
-    .select("*, customers(*), products(*), payment_proofs(*)")
-    .eq("id", orderId)
+// يرسل بريدًا للعميل. يرجع null عند النجاح أو نص المشكلة
+async function notify(id, event) {
+  const { data, error } = await sb.functions.invoke("send-order-email", { body: { request_id: id, event } });
+  if (error) {
+    let msg = error.message || "خطأ غير معروف";
+    if (error.context && typeof error.context.json === "function") {
+      try { const b = await error.context.json(); if (b?.error) msg = b.error; } catch (_) {}
+    }
+    return "تعذّر إرسال البريد (" + msg + ")";
+  }
+  if (data?.error) return "تعذّر إرسال البريد (" + data.error + ")";
+  if (data?.skipped) return "لم يُرسل بريد (" + (data.reason || "") + ")";
+  return null;
+}
+
+async function act(id, fn, okText) {
+  try {
+    const warn = await fn();
+    flash = warn ? { type: "warn", text: okText + " — لكن: " + warn } : { type: "success", text: okText };
+  } catch (e) {
+    flash = { type: "error", text: "تعذّر تنفيذ الإجراء: " + (e.message || e) };
+  }
+  renderRequestDetail(id);
+}
+
+function on(id, handler) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener("click", async (e) => {
+    el.disabled = true;
+    await handler(e);
+    if (document.body.contains(el)) el.disabled = false;
+  });
+}
+
+async function renderRequestDetail(id) {
+  shell(`<div class="loading">جارِ التحميل…</div>`);
+
+  const { data: r, error } = await sb
+    .from("service_requests")
+    .select("*, services(title), packages(title)")
+    .eq("id", id)
     .single();
-
-  if (error || !o) {
-    shell("orders", `<div class="notice error">تعذّر العثور على الطلب. <a href="#/orders">عودة للطلبات</a></div>`);
+  if (error || !r) {
+    shell(`<div class="notice error">تعذّر العثور على الطلب. <a href="#/requests">عودة للطلبات</a></div>`);
     return;
   }
 
-  const proof = (o.payment_proofs || [])[0];
-  let proofImgUrl = null;
-  if (proof) {
-    const { data: signed } = await sb.storage.from("payment-proofs").createSignedUrl(proof.proof_file_path, 3600);
-    proofImgUrl = signed?.signedUrl;
+  const [{ data: proofs }, { data: events }] = await Promise.all([
+    sb.from("request_payment_proofs").select("*").eq("request_id", id).order("created_at", { ascending: false }),
+    sb.from("request_events").select("*").eq("request_id", id).order("created_at", { ascending: false }),
+  ]);
+
+  const proofItems = [];
+  for (const p of proofs || []) {
+    const { data: s } = await sb.storage.from("payment-proofs").createSignedUrl(p.proof_file_path, 3600);
+    proofItems.push({ ...p, url: s?.signedUrl || null });
   }
 
-  const canApprove = ["payment_proof_submitted", "under_review"].includes(o.status);
-  const canDeliver = o.status === "payment_approved";
+  const st = r.status;
+  const canQuote = ["new", "contacted", "quote_sent"].includes(st);
+  const closed = ["delivered", "declined", "cancelled"].includes(st);
+  const what = [r.services?.title, r.packages?.title].filter(Boolean).join(" — ") || "—";
 
-  shell("orders", `
+  const proofHtml = proofItems.length
+    ? proofItems.map((p) => `
+        <div class="info-card">
+          <h4>إثبات تحويل — ${new Date(p.created_at).toLocaleString("ar-SA")}</h4>
+          <div class="info-row"><span>اسم المحوِّل</span><span>${esc(p.transferor_name)}</span></div>
+          <div class="info-row"><span>البنك</span><span>${esc(p.source_bank)}</span></div>
+          <div class="info-row"><span>تاريخ التحويل</span><span>${esc(p.transfer_date)}</span></div>
+          <div class="info-row"><span>رقم المرجع</span><span>${esc(p.reference_number || "—")}</span></div>
+          ${p.url ? (/\.pdf$/i.test(p.proof_file_path)
+            ? `<a href="${esc(p.url)}" target="_blank" class="btn btn-ghost" style="width:auto;margin-top:10px;padding:8px 16px;">فتح ملف الإثبات (PDF)</a>`
+            : `<a href="${esc(p.url)}" target="_blank"><img class="proof-image" src="${esc(p.url)}" alt="إثبات التحويل"></a>`) : ""}
+        </div>`).join("")
+    : "";
+
+  let actions = "";
+  if (st === "new") actions += `<div class="action-row"><button class="btn btn-ghost" id="contactedBtn">تم التواصل مع العميل</button></div>`;
+  if (st === "payment_proof_submitted") {
+    actions += `<p style="font-size:13.5px;color:var(--slate);">طابق التحويل مع الحساب البنكي قبل الاعتماد.</p>
+      <div class="action-row">
+        <button class="btn btn-success" id="approveBtn">اعتماد السداد وبدء التنفيذ</button>
+        <button class="btn btn-danger" id="rejectBtn">رفض الإثبات</button>
+      </div>`;
+  }
+  if (st === "quote_accepted") actions += `<p style="font-size:13.5px;color:var(--slate);">العميل وافق على العرض وبانتظار تحويل المبلغ.</p>`;
+  if (st === "in_progress") actions += `<div class="action-row"><button class="btn btn-success" id="deliverBtn">تحديد كمُسلَّم</button></div>`;
+  if (!closed) actions += `<div class="action-row"><button class="btn btn-ghost" id="declineBtn" style="color:var(--alert);border-color:var(--alert);">إغلاق الطلب</button></div>`;
+  if (!actions) actions = `<p style="font-size:13.5px;color:var(--slate);">لا توجد إجراءات متاحة في هذه الحالة.</p>`;
+
+  const quoteForm = canQuote ? `
+    <div class="info-card">
+      <h4>${st === "quote_sent" ? "تعديل عرض السعر وإعادة إرساله" : "إعداد عرض السعر"}</h4>
+      <div id="quoteMsg"></div>
+      <form id="quoteForm">
+        <div class="field"><label>المبلغ (ريال) * — اذكر في النطاق إن كان شاملًا الضريبة</label>
+          <input required type="number" min="1" step="0.01" name="quote_amount" value="${esc(r.quote_amount ?? "")}"></div>
+        <div class="field"><label>نطاق العمل * (ما الذي سيُنفَّذ)</label>
+          <textarea required name="quote_scope" rows="5">${esc(r.quote_scope || "")}</textarea></div>
+        <div class="field"><label>مدة التنفيذ</label>
+          <input name="quote_duration" value="${esc(r.quote_duration || "")}" placeholder="مثال: 3 أسابيع"></div>
+        <div class="field"><label>صالح حتى</label>
+          <input type="date" name="quote_valid_until" value="${esc(r.quote_valid_until || "")}"></div>
+        <div class="field"><label>ملاحظات للعميل</label>
+          <textarea name="quote_notes" rows="3">${esc(r.quote_notes || "")}</textarea></div>
+        <button class="btn btn-primary" type="submit">${st === "quote_sent" ? "حفظ وإعادة الإرسال للعميل" : "حفظ وإرسال العرض للعميل"}</button>
+      </form>
+    </div>` : "";
+
+  const quoteView = !canQuote && r.quote_amount != null ? `
+    <div class="info-card">
+      <h4>عرض السعر</h4>
+      <div class="info-row"><span>المبلغ</span><span>${Number(r.quote_amount).toLocaleString("ar-SA")} ريال</span></div>
+      <div class="info-row"><span>مدة التنفيذ</span><span>${esc(r.quote_duration || "—")}</span></div>
+      <div class="info-row"><span>صالح حتى</span><span>${esc(r.quote_valid_until || "—")}</span></div>
+      <div style="white-space:pre-line;font-size:13.5px;margin-top:10px;">${esc(r.quote_scope || "")}</div>
+    </div>` : "";
+
+  shell(`
     <div class="admin-header-row">
-      <h1>طلب ${o.order_number}</h1>
-      <span class="status-badge status-${o.status}">${STATUS_LABELS[o.status]}</span>
+      <h1>طلب ${esc(r.request_number)}</h1>
+      <span class="status-badge status-${esc(st)}">${esc(STATUS_LABELS[st] || st)}</span>
     </div>
-    <div id="actionMsg"></div>
+    ${flashHtml()}
     <div class="detail-grid">
       <div>
         <div class="info-card">
           <h4>بيانات العميل</h4>
-          <div class="info-row"><span>الاسم</span><span>${o.customers.full_name}</span></div>
-          <div class="info-row"><span>الجوال</span><span>${o.customers.phone}</span></div>
-          <div class="info-row"><span>البريد الإلكتروني</span><span>${o.customers.email}</span></div>
-          <div class="info-row"><span>المنشأة</span><span>${o.customers.company_name || "—"}</span></div>
-          ${o.notes ? `<div class="info-row"><span>ملاحظات</span><span>${o.notes}</span></div>` : ""}
+          <div class="info-row"><span>الاسم</span><span>${esc(r.full_name)}</span></div>
+          <div class="info-row"><span>الجوال</span><span><a href="https://wa.me/${esc(String(r.phone).replace(/\D/g, "").replace(/^0/, "966"))}" target="_blank" style="color:var(--brass);">${esc(r.phone)}</a></span></div>
+          <div class="info-row"><span>البريد</span><span>${esc(r.email)}</span></div>
+          <div class="info-row"><span>المنشأة</span><span>${esc(r.company_name || "—")}</span></div>
+          <div class="info-row"><span>وضع النشاط</span><span>${esc(r.business_stage || "—")}</span></div>
+          <div class="info-row"><span>الحجم</span><span>${esc(r.business_size || "—")}</span></div>
+          <div class="info-row"><span>الميزانية التقريبية</span><span>${esc(r.budget_range || "—")}</span></div>
+          <div class="info-row"><span>الخدمة / الباقة</span><span>${esc(what)}</span></div>
+          <div class="info-row"><span>المصدر</span><span>${esc(r.source)}</span></div>
+          <div class="info-row"><span>تاريخ الطلب</span><span>${new Date(r.created_at).toLocaleString("ar-SA")}</span></div>
         </div>
-
         <div class="info-card">
-          <h4>المنتج</h4>
-          <div class="info-row"><span>الدراسة</span><span>${o.products.title}</span></div>
-          <div class="info-row"><span>المبلغ</span><span>${Number(o.amount).toLocaleString("ar-SA")} ${o.currency}</span></div>
+          <h4>هدف العميل</h4>
+          <div style="white-space:pre-line;font-size:14px;">${esc(r.goal)}</div>
+          ${r.message ? `<h4 style="margin-top:16px;">ملاحظات العميل</h4><div style="white-space:pre-line;font-size:14px;">${esc(r.message)}</div>` : ""}
         </div>
-
-        ${proof ? `
-        <div class="info-card">
-          <h4>إثبات التحويل</h4>
-          <div class="info-row"><span>اسم المحوِّل</span><span>${proof.transferor_name}</span></div>
-          <div class="info-row"><span>البنك</span><span>${proof.source_bank}</span></div>
-          <div class="info-row"><span>تاريخ التحويل</span><span>${proof.transfer_date}</span></div>
-          <div class="info-row"><span>رقم المرجع</span><span>${proof.reference_number || "—"}</span></div>
-          ${proofImgUrl ? `<a href="${proofImgUrl}" target="_blank"><img class="proof-image" src="${proofImgUrl}"></a>` : ""}
-        </div>` : `<div class="notice">لم يتم رفع إثبات تحويل بعد.</div>`}
+        ${quoteForm}
+        ${quoteView}
+        ${proofHtml}
       </div>
-
       <div>
         <div class="info-card">
           <h4>الإجراءات</h4>
-          ${canApprove ? `
-            <div class="action-row">
-              <button class="btn btn-success" id="approveBtn">اعتماد السداد</button>
-              <button class="btn btn-danger" id="rejectBtn">رفض الإثبات</button>
-            </div>` : ""}
-          ${canDeliver ? `
-            <p style="font-size:13.5px;color:var(--slate);margin-top:12px;">السداد معتمد. تقدر ترسل الدراسة تلقائيًا بالبريد، أو تولّد رابط تحميل وترسله بنفسك يدويًا.</p>
-            <div class="action-row">
-              <button class="btn btn-success" id="autoSendBtn" style="width:auto;">إرسال الدراسة تلقائيًا بالبريد</button>
-              <button class="btn btn-ghost" id="genLinkBtn" style="width:auto;">توليد رابط يدوي فقط</button>
-            </div>
-            <div id="linkBox"></div>
-          ` : ""}
-          ${!canApprove && !canDeliver ? `<p style="font-size:13.5px;color:var(--slate);">لا توجد إجراءات متاحة لهذا الطلب في حالته الحالية.</p>` : ""}
+          ${actions}
+        </div>
+        <div class="info-card">
+          <h4>ملاحظات داخلية (لا تظهر للعميل)</h4>
+          <textarea id="adminNotes" rows="4" style="width:100%;padding:10px;border:1px solid var(--line);font-family:var(--font-body);">${esc(r.admin_notes || "")}</textarea>
+          <div class="action-row"><button class="btn btn-ghost" id="saveNotesBtn">حفظ الملاحظات</button></div>
+        </div>
+        <div class="info-card">
+          <h4>سجل الطلب</h4>
+          ${(events || []).map((ev) => `
+            <div class="info-row"><span>${esc(EVENT_LABELS[ev.event] || ev.event)}${ev.details ? " — " + esc(ev.details) : ""}</span>
+            <span style="white-space:nowrap;">${new Date(ev.created_at).toLocaleString("ar-SA", { dateStyle: "short", timeStyle: "short" })}</span></div>`).join("") || `<div style="font-size:13.5px;color:var(--slate);">لا يوجد سجل.</div>`}
         </div>
       </div>
-    </div>
-  `);
+    </div>`);
 
-  document.getElementById("approveBtn")?.addEventListener("click", async () => {
-    await updateOrderStatus(orderId, "payment_approved", "approved");
-    sb.functions.invoke("send-order-email", { body: { order_id: orderId, event: "payment_approved" } }).catch(() => {});
-    location.hash = "#/orders/" + orderId;
-    route();
-  });
-  document.getElementById("rejectBtn")?.addEventListener("click", async () => {
-    const reason = prompt("سبب الرفض (سيظهر داخليًا فقط):");
+  on("contactedBtn", () => act(id, () => setStatus(id, "contacted", "contacted"), "تم تحديث الحالة."));
+
+  on("approveBtn", () => act(id, async () => {
+    await setStatus(id, "in_progress", "payment_approved", null, { public_note: null });
+    return await notify(id, "payment_approved");
+  }, "تم اعتماد السداد وبدء التنفيذ."));
+
+  on("rejectBtn", async () => {
+    const reason = prompt("سبب الرفض (سيظهر للعميل في البريد وصفحة الطلب):");
     if (reason === null) return;
-    await sb.from("orders").update({ status: "rejected", rejection_reason: reason }).eq("id", orderId);
-    await sb.from("order_events").insert({ order_id: orderId, event: "rejected", actor: "admin", details: reason });
-    sb.functions.invoke("send-order-email", { body: { order_id: orderId, event: "rejected", reason } }).catch(() => {});
-    route();
+    await act(id, async () => {
+      await setStatus(id, "payment_rejected", "payment_rejected", reason, { public_note: reason || null });
+      return await notify(id, "payment_rejected");
+    }, "تم رفض الإثبات وإشعار العميل.");
   });
-  document.getElementById("autoSendBtn")?.addEventListener("click", async (e) => {
-    const btn = e.target;
-    btn.disabled = true; btn.textContent = "جارِ الإرسال…";
-    const { data, error } = await sb.functions.invoke("send-order-email", { body: { order_id: orderId, event: "delivered" } });
-    if (error || data?.error) {
-      let detail = data?.error || error?.message || "خطأ غير معروف";
-      if (error?.context && typeof error.context.json === "function") {
-        try { const body = await error.context.json(); if (body?.error) detail = body.error; } catch (_) {}
-      }
-      document.getElementById("linkBox").innerHTML = `<div class="notice error">تعذّر إرسال البريد تلقائيًا: ${detail}</div>`;
-      btn.disabled = false; btn.textContent = "إرسال الدراسة تلقائيًا بالبريد";
-      return;
-    }
-    if (data?.skipped) {
-      document.getElementById("linkBox").innerHTML = `<div class="notice">لم يتم إرسال بريد — مفتاح Resend غير مضاف بعد. استخدم "توليد رابط يدوي فقط" حاليًا.</div>`;
-      btn.disabled = false; btn.textContent = "إرسال الدراسة تلقائيًا بالبريد";
-      return;
-    }
-    await updateOrderStatus(orderId, "delivered", "delivered");
-    route();
+
+  on("deliverBtn", () => act(id, async () => {
+    await setStatus(id, "delivered", "delivered");
+    return await notify(id, "delivered");
+  }, "تم تحديد الطلب كمُسلَّم وإشعار العميل."));
+
+  on("declineBtn", async () => {
+    if (!confirm("هل تريد إغلاق هذا الطلب؟")) return;
+    await act(id, () => setStatus(id, "declined", "declined"), "تم إغلاق الطلب.");
   });
-  document.getElementById("genLinkBtn")?.addEventListener("click", async () => {
-    const { data: signed, error: sErr } = await sb.storage.from("product-files").createSignedUrl(o.products.study_file_path, 60 * 60 * 24 * 7);
-    if (sErr || !signed) {
-      document.getElementById("linkBox").innerHTML = `<div class="notice error">تعذّر توليد الرابط. تأكد أن مسار ملف الدراسة صحيح في بيانات المنتج.</div>`;
+
+  on("saveNotesBtn", async () => {
+    const notes = document.getElementById("adminNotes").value;
+    const { error: e } = await sb.from("service_requests").update({ admin_notes: notes || null }).eq("id", id);
+    flash = e ? { type: "error", text: "تعذّر حفظ الملاحظات." } : { type: "success", text: "تم حفظ الملاحظات." };
+    renderRequestDetail(id);
+  });
+
+  document.getElementById("quoteForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const amount = Number(fd.get("quote_amount"));
+    const scope = String(fd.get("quote_scope") || "").trim();
+    if (!(amount > 0) || !scope) {
+      document.getElementById("quoteMsg").innerHTML = `<div class="notice error">أدخل مبلغًا صحيحًا ونطاق العمل.</div>`;
       return;
     }
-    document.getElementById("linkBox").innerHTML = `
-      <div class="link-copy-box">
-        <input readonly value="${signed.signedUrl}" id="linkInput">
-        <button class="btn btn-ghost" id="copyLinkBtn">نسخ</button>
-      </div>
-      <small style="color:var(--slate);">الرابط صالح لمدة 7 أيام</small>
-      <div class="action-row"><button class="btn btn-success" id="manualDeliverBtn" style="width:auto;">تحديد كمُسلَّم بعد الإرسال اليدوي</button></div>
-    `;
-    document.getElementById("copyLinkBtn").addEventListener("click", () => {
-      document.getElementById("linkInput").select();
-      navigator.clipboard.writeText(signed.signedUrl);
-    });
-    document.getElementById("manualDeliverBtn").addEventListener("click", async () => {
-      await updateOrderStatus(orderId, "delivered", "delivered");
-      route();
-    });
+    e.target.querySelector("button").disabled = true;
+    await act(id, async () => {
+      await setStatus(id, "quote_sent", "quote_sent", "المبلغ: " + amount, {
+        quote_amount: amount,
+        quote_scope: scope,
+        quote_duration: String(fd.get("quote_duration") || "").trim() || null,
+        quote_valid_until: fd.get("quote_valid_until") || null,
+        quote_notes: String(fd.get("quote_notes") || "").trim() || null,
+        quote_sent_at: new Date().toISOString(),
+      });
+      return await notify(id, "quote_sent");
+    }, "تم حفظ عرض السعر وإرساله للعميل.");
   });
 }
 
-async function updateOrderStatus(orderId, status, event) {
-  await sb.from("orders").update({ status }).eq("id", orderId);
-  await sb.from("order_events").insert({ order_id: orderId, event, actor: "admin" });
-}
+// ---------------- Services / Packages management ----------------
+const CONTENT = {
+  services: { label: "الخدمات", single: "خدمة", audience: false },
+  packages: { label: "الباقات", single: "باقة", audience: true },
+};
 
-// ---------------- Products list ----------------
-async function renderProducts() {
-  shell("products", `
+async function renderContentList(table) {
+  const meta = CONTENT[table];
+  shell(`
     <div class="admin-header-row">
-      <h1>المنتجات</h1>
-      <a href="#/products/new" class="btn btn-primary" style="width:auto;padding:10px 18px;">+ إضافة دراسة</a>
+      <h1>${meta.label}</h1>
+      <a href="#/${table}/new" class="btn btn-primary" style="width:auto;padding:10px 18px;">+ إضافة ${meta.single}</a>
     </div>
-    <div id="wrap"><div class="loading">جارِ التحميل…</div></div>
-  `);
+    <div id="wrap"><div class="loading">جارِ التحميل…</div></div>`);
 
-  const { data, error } = await sb.from("products").select("*").order("created_at", { ascending: false });
+  const { data, error } = await sb.from(table).select("*").order("sort_order").order("created_at");
   const wrap = document.getElementById("wrap");
-  if (error) { wrap.innerHTML = `<div class="notice error">تعذّر تحميل المنتجات.</div>`; return; }
-  if (!data.length) { wrap.innerHTML = `<div class="empty-state">لا توجد منتجات بعد.</div>`; return; }
+  if (error) { wrap.innerHTML = `<div class="notice error">تعذّر التحميل.</div>`; return; }
+  if (!data.length) { wrap.innerHTML = `<div class="empty-state">لا يوجد شيء بعد.</div>`; return; }
 
   wrap.innerHTML = `
     <table class="data-table">
-      <thead><tr><th>الاسم</th><th>التصنيف</th><th>السعر</th><th>الحالة</th></tr></thead>
+      <thead><tr><th>الاسم</th><th>الترتيب</th><th>الحالة</th></tr></thead>
       <tbody>
-        ${data.map(p => `
-          <tr data-id="${p.id}">
-            <td>${p.title}</td>
-            <td>${p.category}</td>
-            <td>${Number(p.price).toLocaleString("ar-SA")} ${p.currency}</td>
-            <td><span class="status-badge status-${p.status === 'published' ? 'payment_approved' : p.status === 'draft' ? 'pending_payment' : 'rejected'}">${p.status === 'published' ? 'منشور' : p.status === 'draft' ? 'مسودة' : 'غير متاح'}</span></td>
+        ${data.map((x) => `
+          <tr data-id="${esc(x.id)}">
+            <td>${esc(x.title)}</td>
+            <td>${esc(x.sort_order)}</td>
+            <td><span class="status-badge status-${x.status === "published" ? "payment_approved" : "pending_payment"}">${x.status === "published" ? "منشور" : "مسودة"}</span></td>
           </tr>`).join("")}
       </tbody>
-    </table>
-  `;
-  wrap.querySelectorAll("tr[data-id]").forEach(tr => {
-    tr.addEventListener("click", () => location.hash = `#/products/${tr.dataset.id}`);
-  });
+    </table>`;
+  wrap.querySelectorAll("tr[data-id]").forEach((tr) =>
+    tr.addEventListener("click", () => (location.hash = `#/${table}/${tr.dataset.id}`))
+  );
 }
 
-// ---------------- Product form (create/edit) ----------------
-async function renderProductForm(admin, productId) {
-  let p = {
-    slug: "", title: "", category: "", short_description: "", full_description: "",
-    contents: [], price: "", currency: "SAR", status: "draft",
-    cover_image_path: "", sample_file_path: "", study_file_path: "",
-  };
-  if (productId) {
-    const { data } = await sb.from("products").select("*").eq("id", productId).single();
-    if (data) p = data;
+async function renderContentForm(table, id) {
+  const meta = CONTENT[table];
+  let x = { slug: "", title: "", short_description: "", full_description: "", audience: "", items: [], sort_order: 0, status: "draft" };
+  if (id) {
+    const { data } = await sb.from(table).select("*").eq("id", id).single();
+    if (data) x = data;
   }
 
-  shell("products", `
-    <div class="admin-header-row"><h1>${productId ? "تعديل الدراسة" : "إضافة دراسة جديدة"}</h1></div>
+  shell(`
+    <div class="admin-header-row"><h1>${id ? "تعديل" : "إضافة"} ${meta.single}</h1></div>
     <div id="formMsg"></div>
-    <form id="pForm" class="info-card" style="max-width:640px;">
-      <div class="field"><label>اسم الدراسة *</label><input required name="title" value="${p.title || ''}"></div>
-      <div class="field"><label>الرابط (slug) *</label><input required name="slug" value="${p.slug || ''}" placeholder="coffee-shop-feasibility"></div>
-      <div class="field"><label>التصنيف *</label><input required name="category" value="${p.category || ''}" placeholder="دراسات الجدوى"></div>
-      <div class="field"><label>وصف مختصر</label><textarea name="short_description">${p.short_description || ''}</textarea></div>
-      <div class="field"><label>الوصف الكامل</label><textarea name="full_description">${p.full_description || ''}</textarea></div>
-      <div class="field"><label>محتويات الدراسة (كل بند بسطر)</label><textarea name="contents_text" rows="6">${(Array.isArray(p.contents) ? p.contents : []).join("\n")}</textarea></div>
-      <div class="field"><label>السعر (ريال) *</label><input required type="number" step="0.01" name="price" value="${p.price || ''}"></div>
-      <div class="field"><label>الحالة</label>
-        <select name="status">
-          <option value="draft" ${p.status==='draft'?'selected':''}>مسودة</option>
-          <option value="published" ${p.status==='published'?'selected':''}>منشور</option>
-          <option value="unavailable" ${p.status==='unavailable'?'selected':''}>غير متاح</option>
-        </select>
+    <form id="cForm" class="info-card" style="max-width:640px;">
+      <div class="field"><label>الاسم *</label><input required name="title" value="${esc(x.title)}"></div>
+      <div class="field"><label>الرابط (بالإنجليزي، أحرف صغيرة وشرطات) *</label>
+        <input required name="slug" value="${esc(x.slug)}" placeholder="business-plans" pattern="[a-z0-9]+(-[a-z0-9]+)*"></div>
+      <div class="field"><label>وصف مختصر</label><textarea name="short_description">${esc(x.short_description)}</textarea></div>
+      <div class="field"><label>الوصف الكامل</label><textarea name="full_description" rows="5">${esc(x.full_description)}</textarea></div>
+      ${meta.audience ? `<div class="field"><label>لمن تناسب</label><input name="audience" value="${esc(x.audience)}"></div>` : ""}
+      <div class="field"><label>ما تشمله (كل بند في سطر)</label>
+        <textarea name="items_text" rows="6">${esc((Array.isArray(x.items) ? x.items : []).join("\n"))}</textarea></div>
+      <div class="form-row-2">
+        <div class="field"><label>الترتيب (الأصغر أولاً)</label><input type="number" name="sort_order" value="${esc(x.sort_order)}"></div>
+        <div class="field"><label>الحالة</label>
+          <select name="status">
+            <option value="draft" ${x.status === "draft" ? "selected" : ""}>مسودة (مخفي)</option>
+            <option value="published" ${x.status === "published" ? "selected" : ""}>منشور</option>
+          </select>
+        </div>
       </div>
-
-      <div class="field"><label>ملف الدراسة الكامل (PDF — خاص)</label>
-        <input type="file" id="studyFile" accept="application/pdf">
-        <small>الحالي: ${p.study_file_path || "لا يوجد"}</small>
-      </div>
-      <div class="field"><label>عينة الدراسة (PDF — عام)</label>
-        <input type="file" id="sampleFile" accept="application/pdf">
-        <small>الحالي: ${p.sample_file_path || "لا يوجد"}</small>
-      </div>
-      <div class="field"><label>صورة الغلاف (عام)</label>
-        <input type="file" id="coverFile" accept="image/*">
-        <small>الحالي: ${p.cover_image_path || "لا يوجد"}</small>
-      </div>
-
       <button class="btn btn-primary" type="submit">حفظ</button>
-    </form>
-  `);
+    </form>`);
 
-  document.getElementById("pForm").addEventListener("submit", async (e) => {
+  document.getElementById("cForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
     const btn = e.target.querySelector("button");
     btn.disabled = true; btn.textContent = "جارِ الحفظ…";
-    const msgEl = document.getElementById("formMsg");
+    const payload = {
+      slug: String(fd.get("slug")).trim(),
+      title: String(fd.get("title")).trim(),
+      short_description: fd.get("short_description") || null,
+      full_description: fd.get("full_description") || null,
+      items: String(fd.get("items_text") || "").split("\n").map((s) => s.trim()).filter(Boolean),
+      sort_order: parseInt(fd.get("sort_order"), 10) || 0,
+      status: fd.get("status"),
+    };
+    if (meta.audience) payload.audience = fd.get("audience") || null;
 
-    try {
-      const slug = fd.get("slug").trim();
-      let study_file_path = p.study_file_path, sample_file_path = p.sample_file_path, cover_image_path = p.cover_image_path;
+    const { error } = id
+      ? await sb.from(table).update(payload).eq("id", id)
+      : await sb.from(table).insert(payload);
 
-      const safeExt = (name) => (name.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "");
-      const studyFile = document.getElementById("studyFile").files[0];
-      if (studyFile) {
-        const path = `${slug}/study-${Date.now()}.${safeExt(studyFile.name)}`;
-        const { error } = await sb.storage.from("product-files").upload(path, studyFile, { upsert: true });
-        if (error) throw error;
-        study_file_path = path;
-      }
-      const sampleFile = document.getElementById("sampleFile").files[0];
-      if (sampleFile) {
-        const path = `${slug}/sample-${Date.now()}.${safeExt(sampleFile.name)}`;
-        const { error } = await sb.storage.from("product-samples").upload(path, sampleFile, { upsert: true });
-        if (error) throw error;
-        sample_file_path = path;
-      }
-      const coverFile = document.getElementById("coverFile").files[0];
-      if (coverFile) {
-        const path = `${slug}/cover-${Date.now()}.${safeExt(coverFile.name)}`;
-        const { error } = await sb.storage.from("product-covers").upload(path, coverFile, { upsert: true });
-        if (error) throw error;
-        cover_image_path = path;
-      }
-
-      if (!study_file_path) throw new Error("ملف الدراسة الكامل مطلوب");
-
-      const payload = {
-        slug,
-        title: fd.get("title"),
-        category: fd.get("category"),
-        short_description: fd.get("short_description"),
-        full_description: fd.get("full_description"),
-        contents: fd.get("contents_text").split("\n").map(s => s.trim()).filter(Boolean),
-        price: fd.get("price"),
-        currency: "SAR",
-        status: fd.get("status"),
-        study_file_path, sample_file_path, cover_image_path,
-      };
-
-      if (productId) {
-        const { error } = await sb.from("products").update(payload).eq("id", productId);
-        if (error) throw error;
-      } else {
-        const { error } = await sb.from("products").insert(payload);
-        if (error) throw error;
-      }
-
-      location.hash = "#/products";
-      route();
-    } catch (err) {
-      msgEl.innerHTML = `<div class="notice error">تعذّر الحفظ: ${err.message || err}</div>`;
+    if (error) {
+      document.getElementById("formMsg").innerHTML = `<div class="notice error">تعذّر الحفظ: ${esc(error.message)}</div>`;
       btn.disabled = false; btn.textContent = "حفظ";
+      return;
     }
+    location.hash = `#/${table}`;
   });
 }
