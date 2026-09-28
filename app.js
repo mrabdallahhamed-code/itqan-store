@@ -72,90 +72,6 @@ const FAQ = [
   { q: "خدمتي غير موجودة ضمن القائمة، ماذا أفعل؟", a: "استخدم خدمة \"خدمات مخصصة للشركات القائمة\"، أو اذكر احتياجك بالتفصيل عند إرسال طلب عرض السعر وسنتواصل معك." },
 ];
 
-const MOCKUP_MARKET = `
-<svg viewBox="0 0 260 170" xmlns="http://www.w3.org/2000/svg">
-  <rect width="260" height="170" fill="#FBFAF7"/>
-  <rect x="0" y="0" width="260" height="34" fill="#3A584B"/>
-  <rect x="16" y="12" width="90" height="10" rx="2" fill="#F2F0E9"/>
-  <rect x="16" y="52" width="228" height="10" rx="2" fill="#E7E3D8"/>
-  <rect x="16" y="70" width="180" height="10" rx="2" fill="#E7E3D8"/>
-  <g transform="translate(16,92)">
-    <rect x="0" y="40" width="26" height="30" fill="#BCA569"/>
-    <rect x="34" y="24" width="26" height="46" fill="#BCA569" opacity="0.8"/>
-    <rect x="68" y="10" width="26" height="60" fill="#3A584B"/>
-    <rect x="102" y="30" width="26" height="40" fill="#BCA569" opacity="0.6"/>
-    <rect x="136" y="4" width="26" height="66" fill="#3A584B" opacity="0.85"/>
-  </g>
-</svg>`;
-
-const MOCKUP_FINANCE = `
-<svg viewBox="0 0 260 170" xmlns="http://www.w3.org/2000/svg">
-  <rect width="260" height="170" fill="#FBFAF7"/>
-  <rect x="0" y="0" width="260" height="34" fill="#3A584B"/>
-  <rect x="16" y="12" width="110" height="10" rx="2" fill="#F2F0E9"/>
-  <polyline points="16,120 60,90 100,104 140,60 184,74 228,40" fill="none" stroke="#BCA569" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="228" cy="40" r="4" fill="#3A584B"/>
-  <rect x="16" y="140" width="60" height="10" rx="2" fill="#E7E3D8"/>
-  <rect x="90" y="140" width="60" height="10" rx="2" fill="#E7E3D8"/>
-  <rect x="164" y="140" width="80" height="10" rx="2" fill="#E7E3D8"/>
-</svg>`;
-
-const MOCKUP_RECOMMEND = `
-<svg viewBox="0 0 260 170" xmlns="http://www.w3.org/2000/svg">
-  <rect width="260" height="170" fill="#FBFAF7"/>
-  <rect x="0" y="0" width="260" height="34" fill="#3A584B"/>
-  <rect x="16" y="12" width="80" height="10" rx="2" fill="#F2F0E9"/>
-  <g fill="#E7E3D8">
-    <circle cx="24" cy="58" r="6" fill="#BCA569"/><rect x="40" y="53" width="200" height="10" rx="2"/>
-    <circle cx="24" cy="86" r="6" fill="#BCA569"/><rect x="40" y="81" width="180" height="10" rx="2"/>
-    <circle cx="24" cy="114" r="6" fill="#BCA569"/><rect x="40" y="109" width="200" height="10" rx="2"/>
-    <circle cx="24" cy="142" r="6" fill="#BCA569"/><rect x="40" y="137" width="150" height="10" rx="2"/>
-  </g>
-</svg>`;
-
-const HERO_ILLUSTRATION = `
-  <svg class="hero-illustration" viewBox="0 0 380 260" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="barG" x1="0" y1="1" x2="0" y2="0">
-        <stop offset="0" stop-color="#C9A66B"/><stop offset="1" stop-color="#EFDDB4"/>
-      </linearGradient>
-      <linearGradient id="cardG" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#4E6B54"/><stop offset="1" stop-color="#3B5240"/>
-      </linearGradient>
-    </defs>
-    <circle cx="300" cy="46" r="64" fill="#ffffff" opacity="0.06"/>
-    <circle cx="46" cy="220" r="40" fill="#C9A66B" opacity="0.15"/>
-
-    <g>
-      <rect x="18" y="150" width="36" height="80" rx="6" fill="url(#barG)" opacity="0.9"/>
-      <rect x="64" y="118" width="36" height="112" rx="6" fill="url(#barG)"/>
-      <rect x="110" y="70" width="36" height="160" rx="6" fill="#F4E6C6"/>
-      <path d="M20 140 66 104 112 60 150 34" stroke="#ffffff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
-      <circle cx="150" cy="34" r="6" fill="#ffffff"/>
-    </g>
-
-    <g transform="translate(178,36)">
-      <rect x="0" y="0" width="176" height="200" rx="16" fill="#ffffff" opacity="0.97"/>
-      <rect x="0" y="0" width="176" height="40" rx="16" fill="url(#cardG)"/>
-      <rect x="0" y="24" width="176" height="16" fill="url(#cardG)"/>
-      <circle cx="24" cy="20" r="8" fill="#F4E6C6"/>
-      <rect x="42" y="16" width="90" height="8" rx="4" fill="#ffffff" opacity="0.85"/>
-      <rect x="22" y="60" width="132" height="10" rx="5" fill="#EFEADD"/>
-      <rect x="22" y="80" width="132" height="10" rx="5" fill="#EFEADD"/>
-      <rect x="22" y="100" width="92" height="10" rx="5" fill="#EFEADD"/>
-      <g transform="translate(20,126)">
-        <circle cx="10" cy="10" r="10" fill="#C9A66B"/>
-        <path d="M5.5 10.2l3 3 6.5-6.6" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        <rect x="28" y="4" width="100" height="12" rx="6" fill="#F7F4EC"/>
-      </g>
-      <g transform="translate(20,154)">
-        <circle cx="10" cy="10" r="10" fill="#C9A66B"/>
-        <path d="M5.5 10.2l3 3 6.5-6.6" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        <rect x="28" y="4" width="76" height="12" rx="6" fill="#F7F4EC"/>
-      </g>
-    </g>
-  </svg>`;
-
 let SERVICES_CACHE = null;
 let PACKAGES_CACHE = null;
 async function loadServices() {
@@ -181,16 +97,16 @@ function layout(content) {
       <div class="wrap">
         <a href="#/" class="brand">
           <span class="logo-chip"><img src="logo.png" alt="شعار اتقان لخدمات الأعمال"></span>
-          <span class="brand-text">اتقان<small>استشارات ودراسات وخطط أعمال</small></span>
+          <span class="brand-text">متجر اتقان<small>استشارات ودراسات وخطط أعمال</small></span>
         </a>
         <nav class="nav-links" id="navLinks">
           <a href="#/">الرئيسية</a>
-          <a href="#/services">الخدمات</a>
+          <a href="#/services">المتجر</a>
           <a href="#/how-it-works">كيف نعمل</a>
           <a href="#/about">عن إتقان</a>
           <a href="#/faq">الأسئلة الشائعة</a>
           <a href="#/contact">تواصل معنا</a>
-          <a href="#/request" class="btn btn-primary">استكشف الخدمات</a>
+          <a href="#/services" class="btn btn-primary">تصفح المتجر</a>
         </nav>
         <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="القائمة">
           <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round"/></svg>
@@ -237,14 +153,14 @@ function layout(content) {
   });
 }
 
-const serviceRow = (s) => `
-  <a class="service-row" href="#/service/${esc(s.slug)}">
-    <span class="row-icon">${ICONS[s.slug] || ""}</span>
-    <span class="service-row-body">
+const serviceTile = (s) => `
+  <a class="shop-tile" href="#/service/${esc(s.slug)}">
+    <div class="shop-tile-top"><span class="row-icon">${ICONS[s.slug] || ""}</span></div>
+    <div class="shop-tile-body">
       <h3 class="service-row-title">${esc(s.title)}</h3>
       <p class="service-row-desc">${esc(s.short_description)}</p>
-      <span class="service-row-cta">تفاصيل الخدمة وما تشمله ←</span>
-    </span>
+    </div>
+    <div class="shop-tile-cta">اطلب هذه الخدمة ←</div>
   </a>`;
 
 const packageCard = (k) => `
@@ -294,29 +210,21 @@ async function renderHome() {
         <h1>قرارات أعمال أفضل تبدأ بتحليل واضح</h1>
         <p>دراسات واستشارات تساعدك على فهم السوق، تقييم المشروع، وتحليل الجدوى قبل اتخاذ القرار.</p>
         <div class="hero-actions">
-          <a href="#/services" class="btn btn-primary">استكشف الخدمات</a>
-          <a href="#/" class="btn btn-outline-light" id="seeMockupsBtn">شاهد نموذجاً من أعمالنا</a>
+          <a href="#/services" class="btn btn-primary">تصفح المتجر</a>
         </div>
-        <div class="hero-illustration-wrap">${HERO_ILLUSTRATION}</div>
       </div>
     </section>
 
     <div class="wrap">
-      <div class="section-heading" style="margin-top:44px;"><h2>اختر الخدمة التي تحتاجها</h2><a href="#/services" class="count">كل الخدمات ←</a></div>
-      <div id="homeServices" class="service-index"><div class="loading">جارِ التحميل…</div></div>
+      <div class="section-heading" style="margin-top:36px;"><h2>تصفح متجر الخدمات</h2><a href="#/services" class="count">عرض الكل ←</a></div>
+      <div id="homeServices" class="shop-grid"><div class="loading">جارِ التحميل…</div></div>
 
       <div class="section-heading"><h2>ماذا تحصل عليه عند طلب الدراسة؟</h2></div>
-      <div class="get-grid">
-        ${["تحليل السوق","تحليل المنافسين","النموذج المالي","تقدير التكاليف","الإيرادات المتوقعة","نقطة التعادل","مؤشرات الجدوى","المخاطر","التوصيات"]
-          .map((t) => `<div class="get-tile"><div class="g-icon">${ICONS["specialized-studies"]}</div>${esc(t)}</div>`).join("")}
-      </div>
-
-      <div class="section-heading" id="mockupsSection"><h2>شاهد نموذجاً من مخرجاتنا</h2></div>
-      <p class="mockup-note">نماذج توضيحية لشكل التقرير وليست دراسة فعلية — لفهم طريقة العرض قبل الطلب.</p>
-      <div class="mockup-grid">
-        <div class="mockup-card">${MOCKUP_MARKET}<div class="mockup-caption">نموذج: صفحة تحليل السوق</div></div>
-        <div class="mockup-card">${MOCKUP_FINANCE}<div class="mockup-caption">نموذج: التحليل المالي والرسوم البيانية</div></div>
-        <div class="mockup-card">${MOCKUP_RECOMMEND}<div class="mockup-caption">نموذج: صفحة التوصيات</div></div>
+      <div class="get-panel">
+        <div class="get-list">
+          ${["تحليل السوق","تحليل المنافسين","النموذج المالي","تقدير التكاليف","الإيرادات المتوقعة","نقطة التعادل","مؤشرات الجدوى","المخاطر","التوصيات"]
+            .map((t) => `<div class="get-item"><span class="tick">✓</span>${esc(t)}</div>`).join("")}
+        </div>
       </div>
 
       <div class="section-heading"><h2>لماذا إتقان؟</h2></div>
@@ -358,19 +266,15 @@ async function renderHome() {
     <section class="cta-band">
       <h2>هل لديك مشروع وتحتاج إلى صورة أوضح قبل اتخاذ القرار؟</h2>
       <p>اختر الخدمة المناسبة وابدأ طلبك.</p>
-      <a href="#/services" class="btn btn-primary">استكشف الخدمات</a>
+      <a href="#/services" class="btn btn-primary">تصفح المتجر</a>
     </section>
   `);
 
-  document.getElementById("seeMockupsBtn")?.addEventListener("click", (e) => {
-    e.preventDefault();
-    document.getElementById("mockupsSection")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  });
 
   const [services, packages] = await Promise.all([loadServices(), loadPackages()]);
   const sEl = document.getElementById("homeServices");
   const pEl = document.getElementById("homePackages");
-  if (sEl) sEl.innerHTML = services.length ? services.map(serviceRow).join("") : `<div class="empty-state">قريبًا.</div>`;
+  if (sEl) sEl.innerHTML = services.length ? services.map(serviceTile).join("") : `<div class="empty-state">قريبًا.</div>`;
   if (pEl) pEl.innerHTML = packages.length ? packages.map(packageCard).join("") : `<div class="empty-state">قريبًا.</div>`;
 
   document.getElementById("faqSection")?.querySelectorAll(".faq-item").forEach((item) => {
@@ -398,16 +302,16 @@ function injectSchema(id, obj) {
 
 // ---------------- Services ----------------
 async function renderServices() {
-  setMeta("الخدمات | اتقان", "دراسات متخصصة واستشارية، إعادة هيكلة، خطط تطوير أعمال، وخدمات مخصصة للشركات القائمة.");
+  setMeta("متجر الخدمات | اتقان", "دراسات متخصصة واستشارية، إعادة هيكلة، خطط تطوير أعمال، وخدمات مخصصة للشركات القائمة.");
   layout(`
     <div class="wrap">
-      <div class="section-heading" style="margin-top:40px;"><h2>خدماتنا</h2></div>
-      <p class="note-muted">اختر ما يناسب احتياجك، أو اطلب عرض سعر وسيساعدك فريقنا في التحديد.</p>
-      <div id="list" class="service-index"><div class="loading">جارِ التحميل…</div></div>
+      <div class="section-heading" style="margin-top:40px;"><h2>متجر الخدمات</h2></div>
+      <p class="note-muted">اختر الخدمة، واطلبها مباشرة — سيصلك عرض سعر واضح قبل أي التزام.</p>
+      <div id="list" class="shop-grid"><div class="loading">جارِ التحميل…</div></div>
     </div>`);
   const services = await loadServices();
   document.getElementById("list").innerHTML = services.length
-    ? services.map(serviceRow).join("")
+    ? services.map(serviceTile).join("")
     : `<div class="empty-state">لا توجد خدمات منشورة حاليًا.</div>`;
 }
 
@@ -430,7 +334,7 @@ async function renderService(slug) {
     <div class="wrap">
       <div class="product-detail">
         <div>
-          <div class="breadcrumb"><a href="#/">الرئيسية</a><span class="sep">/</span><a href="#/services">الخدمات</a><span class="sep">/</span>${esc(s.title)}</div>
+          <div class="breadcrumb"><a href="#/">الرئيسية</a><span class="sep">/</span><a href="#/services">المتجر</a><span class="sep">/</span>${esc(s.title)}</div>
           <span class="row-icon" style="display:inline-flex;width:44px;height:44px;">${ICONS[s.slug] || ""}</span>
           <h1 class="pd-title" style="margin-top:14px;">${esc(s.title)}</h1>
           <p class="service-lede">${esc(s.full_description || s.short_description)}</p>
@@ -518,7 +422,7 @@ function renderHowItWorks() {
       </div>
       <div class="cta-band" style="margin-top:12px;">
         <h2>جاهز تبدأ؟</h2>
-        <a href="#/services" class="btn btn-primary">استكشف الخدمات</a>
+        <a href="#/services" class="btn btn-primary">تصفح المتجر</a>
       </div>
     </div>`);
 }
@@ -535,7 +439,7 @@ function renderAbout() {
         <div class="why-card"><div class="icon-badge">${ICONS["specialized-studies"]}</div><h4>مخرجات واضحة</h4><p>الدراسة ليست مجرد صفحات؛ بل تحليل وتوصيات.</p></div>
         <div class="why-card"><div class="icon-badge">${ICONS["custom-corporate-services"]}</div><h4>حلول حسب احتياج المشروع</h4><p>يمكن تخصيص الخدمة حسب طبيعة المشروع وهدف العميل.</p></div>
       </div>
-      <a href="#/services" class="btn btn-primary btn-inline">استكشف الخدمات</a>
+      <a href="#/services" class="btn btn-primary btn-inline">تصفح المتجر</a>
     </div>`);
 }
 
