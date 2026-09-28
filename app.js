@@ -160,6 +160,7 @@ function layout(content) {
           <div class="footer-col">
             <h5>روابط</h5>
             <a href="#/how-it-works">كيف نعمل</a>
+            <a href="#/packages">الباقات</a>
             <a href="#/about">عن إتقان</a>
             <a href="#/faq">الأسئلة الشائعة</a>
             <a href="#/track">تتبع طلبك</a>
@@ -270,6 +271,10 @@ async function renderHome() {
     <div class="wrap">
       <div class="section-heading" style="margin-top:36px;"><h2>تصفح متجر الخدمات</h2><a href="#/services" class="count">عرض الكل ←</a></div>
       <div id="homeServices" class="shop-grid"><div class="loading">جارِ التحميل…</div></div>
+
+      <div class="section-heading"><h2>تفضّل باقة جاهزة بدل التجميع بنفسك؟</h2><a href="#/packages" class="count">كل الباقات ←</a></div>
+      <p class="note-muted">باقات مُجهّزة مسبقًا لمرحلتك (تأسيس، نمو، أو جاهزية) — أو كوّن طلبك بنفسك من السلة أعلاه.</p>
+      <div id="homePackages" class="pkg-grid"><div class="loading">جارِ التحميل…</div></div>
 
       <div class="section-heading"><h2>ماذا تحصل عليه عند طلب الدراسة؟</h2></div>
       <div class="get-panel">
