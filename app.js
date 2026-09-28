@@ -49,6 +49,43 @@ function parseHash() {
 
 const listItems = (x) => (Array.isArray(x.items) ? x.items : []);
 
+// ---------------- أيقونات مصممة (SVG أصلية، لا صور خارجية) ----------------
+const ICONS = {
+  "specialized-studies": `<svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z" stroke-linejoin="round"/><path d="M15 3v4h4M9 12h6M9 15h6M9 9h2" stroke-linecap="round"/></svg>`,
+  "advisory-studies": `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  "restructuring": `<svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.4"/><circle cx="18" cy="6" r="2.4"/><circle cx="12" cy="18" r="2.4"/><path d="M8 7.3 11 16M16 7.3 13 16M6 8.4V12M18 8.4V12" stroke-linecap="round"/></svg>`,
+  "business-development-plans": `<svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M4 19h16" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 12l4-4 4 3 6-7" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  "custom-corporate-services": `<svg viewBox="0 0 24 24"><path d="M12 3 3 7.5 12 12l9-4.5L12 3Z" stroke-linejoin="round"/><path d="M3 12l9 4.5 9-4.5M3 16.5 12 21l9-4.5" stroke-linejoin="round"/></svg>`,
+  "foundation": `<svg viewBox="0 0 24 24"><path d="M4 21h16M6 21V10M18 21V10M4 10l8-6 8 6" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 21v-6h4v6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  "development": `<svg viewBox="0 0 24 24"><path d="M4 17 10 11 14 15 20 9" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 9h5v5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  "readiness": `<svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z" stroke-linejoin="round"/><path d="m8.5 12 2.5 2.5L16 9" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+};
+const icon = (slug) => (ICONS[slug] ? `<div class="icon-badge">${ICONS[slug]}</div>` : "");
+
+const FAQ = [
+  { q: "هل يوجد أسعار ثابتة للباقات؟", a: "لا. كل باقة تجمع مجموعة خدمات تناسب مرحلة مختلفة من عمر شركتك، لكن السعر يُحدَّد بعد فهم احتياجك الفعلي، فتصلك بعد طلبك عرض سعر واضح قبل أي التزام." },
+  { q: "ما الفرق بين الخدمات والباقات؟", a: "الخدمات توضح ماذا نقدّم بالتفصيل (دراسة، استشارة، إعادة هيكلة...)، أما الباقات فتجمع أكثر من خدمة في مسار متكامل يناسب مرحلتك: تأسيس، نمو وتوسع، أو جاهزية للاستثمار." },
+  { q: "كم تستغرق مدة تجهيز عرض السعر؟", a: "غالبًا خلال يومي عمل من استلام طلبك، وقد نتواصل معك قبلها لفهم احتياجك بدقة أكبر." },
+  { q: "هل أدفع قبل معرفة نطاق العمل والسعر؟", a: "أبدًا. لا يُطلب منك أي دفع إلا بعد أن تراجع عرض السعر ونطاق العمل وتوافق عليه صراحة." },
+  { q: "كيف أتابع حالة طلبي؟", a: "من صفحة \"تتبع طلبك\" باستخدام رقم الطلب وبريدك الإلكتروني، وتصلك أيضًا رسالة بريد عند كل مرحلة." },
+];
+
+const HERO_ILLUSTRATION = `
+  <svg class="hero-illustration" viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg">
+    <g fill="none" stroke="#C9A66B" stroke-width="1.4" opacity="0.9">
+      <rect x="14" y="70" width="34" height="70" rx="2"/>
+      <rect x="60" y="46" width="34" height="94" rx="2"/>
+      <rect x="106" y="20" width="34" height="120" rx="2"/>
+      <path d="M14 60 48 60 82 34 116 12" stroke="#F7F4EC" stroke-width="0" />
+      <path d="M20 64 54 40 88 26 124 8" stroke-linecap="round"/>
+      <circle cx="124" cy="8" r="3" fill="#C9A66B" stroke="none"/>
+    </g>
+    <g fill="none" stroke="#C6CEDB" stroke-width="1.2" opacity="0.55">
+      <rect x="176" y="24" width="130" height="112" rx="4"/>
+      <path d="M192 48h98M192 64h98M192 80h68M192 96h98M192 112h50" stroke-linecap="round"/>
+    </g>
+  </svg>`;
+
 async function loadServices() {
   const { data } = await sb.from("services").select("*").eq("status", "published").order("sort_order").order("created_at");
   return data || [];
@@ -90,6 +127,7 @@ function layout(content) {
 
 const serviceCard = (s) => `
   <a class="product-card" href="#/service/${esc(s.slug)}">
+    ${icon(s.slug)}
     <h3>${esc(s.title)}</h3>
     <div class="desc">${esc(s.short_description)}</div>
     <div class="price" style="color:var(--brass);font-weight:500;">تفاصيل الخدمة ←</div>
@@ -97,6 +135,7 @@ const serviceCard = (s) => `
 
 const packageCard = (k) => `
   <div class="pkg-card">
+    ${icon(k.slug)}
     <h3>${esc(k.title)}</h3>
     <p class="pkg-sub">${esc(k.short_description)}</p>
     ${k.audience ? `<div class="pkg-aud"><b>تناسب:</b> ${esc(k.audience)}</div>` : ""}
@@ -139,6 +178,7 @@ async function renderHome() {
           <a href="#/request" class="btn btn-primary">اطلب عرض سعر</a>
           <a href="#/services" class="btn btn-outline-light">استعرض الخدمات</a>
         </div>
+        ${HERO_ILLUSTRATION}
       </div>
     </section>
     <section class="trust-strip">
@@ -162,8 +202,8 @@ async function renderHome() {
       <div id="homeServices" class="product-grid"><div class="loading">جارِ التحميل…</div></div>
 
       <div class="section-heading"><h2>الباقات</h2><a href="#/packages" class="count">تفاصيل الباقات ←</a></div>
+      <p class="note-muted">الخدمات توضح ماذا نقدّم، والباقات تجمع مجموعة خدمات تناسب مرحلة شركتك — بلا أسعار ثابتة، نحدد العرض بعد فهم احتياجك.</p>
       <div id="homePackages" class="pkg-grid"><div class="loading">جارِ التحميل…</div></div>
-      <p class="note-muted">الباقات بلا أسعار ثابتة: نحدد العرض بعد فهم احتياجك ونطاق العمل.</p>
 
       ${eco.length ? `
         <div class="section-heading"><h2>منظومة اتقان</h2></div>
@@ -176,6 +216,13 @@ async function renderHome() {
               <div class="price" style="color:var(--brass);font-weight:500;">زيارة المنصة ←</div>
             </a>`).join("")}
         </div>` : ""}
+
+      <div class="section-heading"><h2>أسئلة شائعة</h2></div>
+      <div class="faq-section" id="faqSection">${FAQ.map((f, i) => `
+        <div class="faq-item" data-i="${i}">
+          <button class="faq-q">${esc(f.q)}<span class="plus">+</span></button>
+          <div class="faq-a"><p>${esc(f.a)}</p></div>
+        </div>`).join("")}</div>
     </div>
     <section class="cta-band">
       <h2>جاهز تبدأ؟</h2>
@@ -189,6 +236,28 @@ async function renderHome() {
   const pEl = document.getElementById("homePackages");
   if (sEl) sEl.innerHTML = services.length ? services.map(serviceCard).join("") : `<div class="empty-state">قريبًا.</div>`;
   if (pEl) pEl.innerHTML = packages.length ? packages.map(packageCard).join("") : `<div class="empty-state">قريبًا.</div>`;
+
+  document.getElementById("faqSection")?.querySelectorAll(".faq-item").forEach((item) => {
+    item.querySelector(".faq-q").addEventListener("click", () => item.classList.toggle("open"));
+  });
+  injectSchema("faq-schema", {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQ.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  });
+}
+
+function injectSchema(id, obj) {
+  document.getElementById(id)?.remove();
+  const s = document.createElement("script");
+  s.type = "application/ld+json";
+  s.id = id;
+  s.textContent = JSON.stringify(obj);
+  document.head.appendChild(s);
 }
 
 // ---------------- Services ----------------
@@ -217,6 +286,7 @@ async function renderService(slug) {
     <div class="wrap">
       <div class="product-detail">
         <div>
+          ${icon(s.slug)}
           <div class="pd-cat">خدمات اتقان</div>
           <h1 class="pd-title">${esc(s.title)}</h1>
           <p class="pd-desc">${esc(s.full_description || s.short_description)}</p>
@@ -233,15 +303,27 @@ async function renderService(slug) {
         </div>
       </div>
     </div>`);
+
+  injectSchema("service-schema", {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    serviceType: s.title,
+    name: s.title,
+    description: s.short_description || s.full_description,
+    provider: { "@type": "ProfessionalService", name: "اتقان لخدمات الأعمال", url: "https://store.itqanbs.sa/" },
+    areaServed: "SA",
+  });
 }
 
 // ---------------- Packages ----------------
 async function renderPackages() {
-  setMeta("الباقات | اتقان", "باقات التأسيس والتطوير والجاهزية من اتقان لخدمات الأعمال.");
+  setMeta("الباقات | اتقان", "باقة التأسيس، باقة النمو والتوسع، وباقة الجاهزية للاستثمار والتمويل من اتقان لخدمات الأعمال.");
   layout(`
     <div class="wrap">
       <div class="section-heading" style="margin-top:40px;"><h2>الباقات</h2></div>
-      <p class="note-muted" style="margin-bottom:20px;">اختر المرحلة التي تناسبك. لا توجد أسعار ثابتة؛ يُحدَّد العرض بعد فهم احتياجك ونطاق العمل.</p>
+      <div class="distinguish-note">
+        <b>الفرق بين الخدمات والباقات:</b> الخدمات توضح ماذا نقدّم بالتفصيل، أما الباقات فتجمع مجموعة خدمات متكاملة تناسب المرحلة التي تمر بها شركتك. لا توجد أسعار ثابتة؛ يُحدَّد العرض بعد فهم احتياجك ونطاق العمل.
+      </div>
       <div id="list" class="pkg-grid"><div class="loading">جارِ التحميل…</div></div>
     </div>`);
   const packages = await loadPackages();
