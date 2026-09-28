@@ -13,6 +13,32 @@ const app = document.getElementById("app");
   if (s) sessionStorage.setItem("itqan_src", s.slice(0, 40));
 })();
 
+// ---------------- السلة ----------------
+function loadCart() {
+  try { return JSON.parse(localStorage.getItem("itqan_cart") || "[]"); } catch (_) { return []; }
+}
+let CART = loadCart();
+function saveCart() {
+  try { localStorage.setItem("itqan_cart", JSON.stringify(CART)); } catch (_) {}
+  updateCartBadge();
+}
+function addToCart(service) {
+  if (CART.some((i) => i.id === service.id)) return false;
+  CART.push({ id: service.id, slug: service.slug, title: service.title });
+  saveCart();
+  return true;
+}
+function removeFromCart(id) {
+  CART = CART.filter((i) => i.id !== id);
+  saveCart();
+}
+function updateCartBadge() {
+  const el = document.getElementById("cartCount");
+  if (!el) return;
+  if (CART.length) { el.textContent = CART.length; el.style.display = "inline-flex"; }
+  else { el.style.display = "none"; }
+}
+
 // ---------------- Helpers ----------------
 const esc = (v) =>
   String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -92,6 +118,7 @@ function layout(content) {
     .map((s) => `<a href="#/service/${esc(s.slug)}">${esc(s.title)}</a>`).join("");
   const social = SETTINGS.social || [];
   const legal = SETTINGS.legal || {};
+  const eco = (SETTINGS.ecosystem || []).filter((e) => e.url);
   app.innerHTML = `
     <header class="site-header">
       <div class="wrap">
@@ -107,6 +134,10 @@ function layout(content) {
           <a href="#/faq">الأسئلة الشائعة</a>
           <a href="#/contact">تواصل معنا</a>
           <a href="#/services" class="btn btn-primary">تصفح المتجر</a>
+          <a href="#/cart" class="cart-link" aria-label="السلة">
+            <svg viewBox="0 0 24 24"><path d="M4 6h2l2 11h10l2-8H7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/></svg>
+            <span class="cart-badge" id="cartCount" style="display:none;">0</span>
+          </a>
         </nav>
         <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="القائمة">
           <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round"/></svg>
@@ -134,6 +165,11 @@ function layout(content) {
             <a href="#/track">تتبع طلبك</a>
           </div>
           <div class="footer-col">
+            <h5>منظومة اتقان</h5>
+            ${SETTINGS.mainSiteUrl ? `<a href="${esc(SETTINGS.mainSiteUrl)}" target="_blank" rel="noopener">الموقع الرئيسي</a>` : ""}
+            ${eco.map((e) => `<a href="${esc(e.url)}" target="_blank" rel="noopener">${esc(e.name)}</a>`).join("")}
+          </div>
+          <div class="footer-col">
             <h5>تواصل معنا</h5>
             <a href="mailto:${esc(SETTINGS.contactEmail || '')}">${esc(SETTINGS.contactEmail || '')}</a>
             <a href="https://wa.me/${esc(CFG.whatsappSupportNumber)}" target="_blank" rel="noopener">واتساب</a>
@@ -151,17 +187,33 @@ function layout(content) {
   document.getElementById("mobileMenuBtn")?.addEventListener("click", () => {
     document.getElementById("navLinks")?.classList.toggle("open");
   });
+  updateCartBadge();
 }
 
 const serviceTile = (s) => `
-  <a class="shop-tile" href="#/service/${esc(s.slug)}">
-    <div class="shop-tile-top"><span class="row-icon">${ICONS[s.slug] || ""}</span></div>
-    <div class="shop-tile-body">
-      <h3 class="service-row-title">${esc(s.title)}</h3>
-      <p class="service-row-desc">${esc(s.short_description)}</p>
+  <div class="shop-tile" data-id="${esc(s.id)}">
+    <a href="#/service/${esc(s.slug)}" class="shop-tile-link">
+      <div class="shop-tile-top"><span class="row-icon">${ICONS[s.slug] || ""}</span></div>
+      <div class="shop-tile-body">
+        <h3 class="service-row-title">${esc(s.title)}</h3>
+        <p class="service-row-desc">${esc(s.short_description)}</p>
+      </div>
+    </a>
+    <div class="shop-tile-actions">
+      <a href="#/service/${esc(s.slug)}" class="shop-tile-cta">التفاصيل ←</a>
+      <button class="add-cart-btn" data-add="${esc(s.id)}" data-title="${esc(s.title)}" data-slug="${esc(s.slug)}">+ أضف للسلة</button>
     </div>
-    <div class="shop-tile-cta">اطلب هذه الخدمة ←</div>
-  </a>`;
+  </div>`;
+
+function wireAddToCartButtons(container) {
+  container.querySelectorAll(".add-cart-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const ok = addToCart({ id: btn.dataset.add, slug: btn.dataset.slug, title: btn.dataset.title });
+      btn.textContent = ok ? "أُضيفت ✓" : "موجودة بالسلة ✓";
+      btn.disabled = true;
+    });
+  });
+}
 
 const packageCard = (k) => `
   <div class="pkg-card">
@@ -190,6 +242,7 @@ function route() {
   if (page === "about") return renderAbout();
   if (page === "faq") return renderFaqPage();
   if (page === "contact") return renderContact();
+  if (page === "cart") return renderCart();
   if (page === "request") return renderRequestForm(params);
   if (page === "done") return renderDone(arg);
   if (page === "track") return renderTrack(arg);
@@ -202,7 +255,6 @@ async function renderHome() {
     "دراسات الجدوى واستشارات الأعمال في السعودية | إتقان",
     "دراسات متخصصة واستشارية، إعادة هيكلة، وخطط تطوير أعمال من اتقان لخدمات الأعمال. اطلب عرض سعر لمشروعك أو شركتك القائمة."
   );
-  const eco = (SETTINGS.ecosystem || []).filter((e) => e.url);
 
   layout(`
     <section class="hero">
@@ -227,12 +279,11 @@ async function renderHome() {
         </div>
       </div>
 
-      <div class="section-heading"><h2>لماذا إتقان؟</h2></div>
-      <div class="why-grid">
-        <div class="why-card"><div class="icon-badge">${ICONS["advisory-studies"]}</div><h4>تحليل عملي</h4><p>نركز على المعلومات التي تساعدك في اتخاذ القرار.</p></div>
-        <div class="why-card"><div class="icon-badge">${ICONS["restructuring"]}</div><h4>فهم للسوق السعودي</h4><p>نراعي بيئة الأعمال والسوق في المملكة.</p></div>
-        <div class="why-card"><div class="icon-badge">${ICONS["specialized-studies"]}</div><h4>مخرجات واضحة</h4><p>الدراسة ليست مجرد صفحات؛ بل تحليل وتوصيات.</p></div>
-        <div class="why-card"><div class="icon-badge">${ICONS["custom-corporate-services"]}</div><h4>حلول حسب احتياج المشروع</h4><p>يمكن تخصيص الخدمة حسب طبيعة المشروع وهدف العميل.</p></div>
+      <div class="trust-bar">
+        <div class="trust-bar-text">
+          <b>اتقان لخدمات الأعمال</b> — تأسست عام ${esc(SETTINGS.founded?.year || "")}، ${esc(SETTINGS.founded?.note || "")}.
+        </div>
+        ${SETTINGS.mainSiteUrl ? `<a href="${esc(SETTINGS.mainSiteUrl)}" target="_blank" rel="noopener" class="trust-bar-link">تعرّف على اتقان ←</a>` : ""}
       </div>
 
       <div class="section-heading"><h2>كيف تحصل على الخدمة؟</h2></div>
@@ -242,18 +293,6 @@ async function renderHome() {
         <div class="step"><div class="num">٣</div><h4>نقوم بالتحليل والإعداد</h4><p>نتواصل معك لفهم النطاق، ويصلك عرض سعر واضح قبل البدء.</p></div>
         <div class="step"><div class="num">٤</div><h4>تستلم المخرجات</h4><p>بعد اعتماد السداد، يبدأ التنفيذ وتستلم دراستك إلكترونيًا.</p></div>
       </div>
-
-      ${eco.length ? `
-        <div class="section-heading"><h2>منظومة اتقان</h2></div>
-        <div class="product-grid">
-          ${eco.map((e) => `
-            <a class="product-card" href="${esc(e.url)}" target="_blank" rel="noopener">
-              <div class="cat">من منظومة اتقان</div>
-              <h3>${esc(e.name)}</h3>
-              <div class="desc">${esc(e.description)}</div>
-              <div class="price" style="color:var(--brass);font-weight:500;">زيارة المنصة ←</div>
-            </a>`).join("")}
-        </div>` : ""}
 
       <div class="section-heading"><h2>أسئلة شائعة</h2></div>
       <div class="faq-section" id="faqSection">${FAQ.map((f, i) => `
@@ -276,6 +315,7 @@ async function renderHome() {
   const pEl = document.getElementById("homePackages");
   if (sEl) sEl.innerHTML = services.length ? services.map(serviceTile).join("") : `<div class="empty-state">قريبًا.</div>`;
   if (pEl) pEl.innerHTML = packages.length ? packages.map(packageCard).join("") : `<div class="empty-state">قريبًا.</div>`;
+  if (sEl) wireAddToCartButtons(sEl);
 
   document.getElementById("faqSection")?.querySelectorAll(".faq-item").forEach((item) => {
     item.querySelector(".faq-q").addEventListener("click", () => item.classList.toggle("open"));
@@ -310,9 +350,11 @@ async function renderServices() {
       <div id="list" class="shop-grid"><div class="loading">جارِ التحميل…</div></div>
     </div>`);
   const services = await loadServices();
-  document.getElementById("list").innerHTML = services.length
+  const listEl = document.getElementById("list");
+  listEl.innerHTML = services.length
     ? services.map(serviceTile).join("")
     : `<div class="empty-state">لا توجد خدمات منشورة حاليًا.</div>`;
+  wireAddToCartButtons(listEl);
 }
 
 async function renderService(slug) {
@@ -375,10 +417,18 @@ async function renderService(slug) {
             <li>نطاق عمل مخصص لاحتياجك</li>
             <li>لا يبدأ العمل إلا بعد موافقتك</li>
           </ul>
-          <a class="btn btn-primary" href="#/request?service=${esc(s.slug)}">اطلب عرض سعر لهذه الخدمة</a>
+          <button class="btn btn-primary" id="detailAddCartBtn" data-add="${esc(s.id)}" data-title="${esc(s.title)}" data-slug="${esc(s.slug)}">أضف للسلة</button>
+          <a href="#/cart" class="btn btn-outline-light btn-inline" style="width:100%;margin-top:10px;text-align:center;display:block;">عرض السلة</a>
         </div>
       </div>
     </div>`);
+
+  document.getElementById("detailAddCartBtn")?.addEventListener("click", (e) => {
+    const btn = e.target;
+    const ok = addToCart({ id: btn.dataset.add, slug: btn.dataset.slug, title: btn.dataset.title });
+    btn.textContent = ok ? "أُضيفت للسلة ✓" : "موجودة بالسلة ✓";
+    btn.disabled = true;
+  });
 
   injectSchema("service-schema", {
     "@context": "https://schema.org",
@@ -428,18 +478,21 @@ function renderHowItWorks() {
 }
 
 function renderAbout() {
-  setMeta("عن إتقان | اتقان لخدمات الأعمال", "اتقان لخدمات الأعمال، دراسات واستشارات لأصحاب المشاريع والشركات القائمة في السعودية.");
+  setMeta("عن إتقان | اتقان لخدمات الأعمال", "اتقان لخدمات الأعمال، شركة سعودية تأسست عام 2024، تقدّم دراسات واستشارات لأصحاب المشاريع والشركات القائمة.");
   layout(`
     <div class="wrap">
       <div class="section-heading" style="margin-top:40px;"><h2>عن إتقان</h2></div>
-      <p class="service-lede">اتقان لخدمات الأعمال تقدّم دراسات واستشارات لأصحاب المشاريع الجديدة والشركات القائمة في السوق السعودي، بهدف مساعدتهم على اتخاذ قرارات أعمال مبنية على تحليل واضح لا على تخمين.</p>
+      <p class="service-lede">اتقان لخدمات الأعمال — شركة سعودية تأسست عام ${esc(SETTINGS.founded?.year || "2024")}، تقدّم دراسات واستشارات لأصحاب المشاريع الجديدة والشركات القائمة في السوق السعودي، بهدف مساعدتهم على اتخاذ قرارات أعمال مبنية على تحليل واضح لا على تخمين.</p>
       <div class="why-grid">
         <div class="why-card"><div class="icon-badge">${ICONS["advisory-studies"]}</div><h4>تحليل عملي</h4><p>نركز على المعلومات التي تساعدك في اتخاذ القرار.</p></div>
         <div class="why-card"><div class="icon-badge">${ICONS["restructuring"]}</div><h4>فهم للسوق السعودي</h4><p>نراعي بيئة الأعمال والسوق في المملكة.</p></div>
         <div class="why-card"><div class="icon-badge">${ICONS["specialized-studies"]}</div><h4>مخرجات واضحة</h4><p>الدراسة ليست مجرد صفحات؛ بل تحليل وتوصيات.</p></div>
         <div class="why-card"><div class="icon-badge">${ICONS["custom-corporate-services"]}</div><h4>حلول حسب احتياج المشروع</h4><p>يمكن تخصيص الخدمة حسب طبيعة المشروع وهدف العميل.</p></div>
       </div>
-      <a href="#/services" class="btn btn-primary btn-inline">تصفح المتجر</a>
+      <div class="hero-actions">
+        <a href="#/services" class="btn btn-primary">تصفح المتجر</a>
+        ${SETTINGS.mainSiteUrl ? `<a href="${esc(SETTINGS.mainSiteUrl)}" target="_blank" rel="noopener" class="btn btn-outline-light" style="color:var(--ink);border-color:var(--ink);">الموقع الرئيسي لاتقان ←</a>` : ""}
+      </div>
     </div>`);
 }
 
@@ -488,12 +541,20 @@ async function renderRequestForm(params) {
   const [services, packages] = await Promise.all([loadServices(), loadPackages()]);
   const preService = params.get("service");
   const prePackage = params.get("package");
+  const cartMode = !prePackage && !preService && CART.length > 0;
   const opt = (v, label, sel) => `<option value="${esc(v)}" ${sel ? "selected" : ""}>${esc(label)}</option>`;
 
   layout(`
     <div class="form-page wide">
       <h2>اطلب عرض سعر</h2>
       <div class="sub">أخبرنا عن مشروعك وسنتواصل معك. لا يُطلب منك أي دفع الآن.</div>
+
+      ${cartMode ? `
+        <div class="summary-box" style="margin-bottom:22px;">
+          <div style="font-weight:600;margin-bottom:8px;">طلبك يشمل:</div>
+          ${CART.map((i) => `<div class="summary-row"><span>${esc(i.title)}</span><a href="#/cart" style="color:var(--alert);font-size:12.5px;">إزالة</a></div>`).join("")}
+        </div>` : ""}
+
       <div id="formMsg"></div>
       <form id="requestForm">
         <div class="hp-field"><label>الموقع <input name="website" tabindex="-1" autocomplete="off"></label></div>
@@ -507,6 +568,7 @@ async function renderRequestForm(params) {
           <div class="field"><label>اسم المنشأة (اختياري)</label><input name="company_name"></div>
         </div>
 
+        ${cartMode ? "" : `
         <div class="form-row-2">
           <div class="field"><label>الخدمة المطلوبة (اختياري)</label>
             <select name="service_id">
@@ -520,7 +582,7 @@ async function renderRequestForm(params) {
               ${packages.map((k) => opt(k.id, k.title, k.slug === prePackage)).join("")}
             </select>
           </div>
-        </div>
+        </div>`}
 
         <div class="form-row-2">
           <div class="field"><label>وضع نشاطك</label>
@@ -560,7 +622,7 @@ async function renderRequestForm(params) {
     const btn = e.target.querySelector("button[type=submit]");
     btn.disabled = true; btn.textContent = "جارِ الإرسال…";
 
-    const { data, error } = await sb.rpc("create_service_request", {
+    const basePayload = {
       p_full_name: fd.get("full_name"),
       p_phone: fd.get("phone"),
       p_email: fd.get("email"),
@@ -570,10 +632,12 @@ async function renderRequestForm(params) {
       p_goal: fd.get("goal"),
       p_budget_range: fd.get("budget_range") || null,
       p_message: fd.get("message") || null,
-      p_service_id: fd.get("service_id") || null,
-      p_package_id: fd.get("package_id") || null,
       p_source: sessionStorage.getItem("itqan_src") || "store",
-    });
+    };
+
+    const { data, error } = cartMode
+      ? await sb.rpc("create_service_request_cart", { ...basePayload, p_service_ids: CART.map((i) => i.id) })
+      : await sb.rpc("create_service_request", { ...basePayload, p_service_id: fd.get("service_id") || null, p_package_id: fd.get("package_id") || null });
 
     if (error || !data || !data.length) {
       document.getElementById("formMsg").innerHTML = `<div class="notice error">تعذّر إرسال الطلب. تأكد من البيانات وحاول مرة أخرى، أو تواصل معنا عبر واتساب.</div>`;
@@ -583,9 +647,40 @@ async function renderRequestForm(params) {
 
     const row = data[0];
     sessionStorage.setItem("itqan_last_email", fd.get("email"));
+    if (cartMode) { CART = []; saveCart(); }
     sb.functions.invoke("send-order-email", { body: { request_id: row.out_request_id, event: "request_received" } }).catch(() => {});
     location.hash = `#/done/${encodeURIComponent(row.out_request_number)}`;
   });
+}
+
+function renderCart() {
+  setMeta("سلتي | اتقان", "الخدمات التي اخترتها قبل إرسال طلب عرض السعر.");
+  layout(`
+    <div class="wrap">
+      <div class="section-heading" style="margin-top:40px;"><h2>سلتي</h2></div>
+      <div id="cartWrap"></div>
+    </div>`);
+
+  function draw() {
+    const wrap = document.getElementById("cartWrap");
+    if (!CART.length) {
+      wrap.innerHTML = `<div class="empty-state">السلة فارغة. <a href="#/services">تصفح المتجر</a></div>`;
+      return;
+    }
+    wrap.innerHTML = `
+      <div class="summary-box" style="margin-bottom:20px;">
+        ${CART.map((i) => `
+          <div class="summary-row">
+            <span>${esc(i.title)}</span>
+            <button class="btn btn-ghost" data-remove="${esc(i.id)}" style="width:auto;padding:6px 14px;font-size:12.5px;">إزالة</button>
+          </div>`).join("")}
+      </div>
+      <a href="#/request" class="btn btn-primary btn-inline">متابعة الطلب (${CART.length} خدمة)</a>
+      <a href="#/services" class="btn btn-ghost btn-inline" style="margin-right:10px;">إضافة خدمة أخرى</a>
+    `;
+    wrap.querySelectorAll("[data-remove]").forEach((b) => b.addEventListener("click", () => { removeFromCart(b.dataset.remove); draw(); }));
+  }
+  draw();
 }
 
 function renderDone(number) {
@@ -705,7 +800,8 @@ function paymentBox(row) {
 function renderResult(row, email) {
   const el = document.getElementById("result");
   const st = row.out_status;
-  const what = [row.out_service_title, row.out_package_title].filter(Boolean).join(" — ") || "طلب استشارة";
+  const cartTitles = (row.out_items || []).map((i) => i.title).filter(Boolean);
+  const what = [row.out_service_title, row.out_package_title, ...cartTitles].filter(Boolean).join("، ") || "طلب استشارة";
   const number = row.out_request_number;
   const wa = `https://wa.me/${CFG.whatsappSupportNumber}?text=${encodeURIComponent("بخصوص طلبي رقم " + number)}`;
   const quoteVisible = row.out_quote_amount != null &&

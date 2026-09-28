@@ -157,7 +157,7 @@ async function renderRequests() {
 
   const { data, error } = await sb
     .from("service_requests")
-    .select("id, request_number, full_name, status, source, created_at, services(title), packages(title)")
+    .select("id, request_number, full_name, status, source, created_at, services(title), packages(title), service_request_items(services(title))")
     .order("created_at", { ascending: false });
 
   const wrap = document.getElementById("wrap");
@@ -188,7 +188,7 @@ async function renderRequests() {
             <tr data-id="${esc(r.id)}">
               <td>${esc(r.request_number)}</td>
               <td>${esc(r.full_name)}</td>
-              <td>${esc([r.services?.title, r.packages?.title].filter(Boolean).join(" — ") || "—")}</td>
+              <td>${esc([r.services?.title, r.packages?.title, ...(r.service_request_items||[]).map(it=>it.services?.title).filter(Boolean)].filter(Boolean).join("، ") || "—")}</td>
               <td><span class="status-badge status-${esc(r.status)}">${esc(STATUS_LABELS[r.status] || r.status)}</span></td>
               <td>${esc(r.source)}</td>
               <td>${new Date(r.created_at).toLocaleDateString("ar-SA")}</td>
@@ -256,7 +256,7 @@ async function renderRequestDetail(id) {
 
   const { data: r, error } = await sb
     .from("service_requests")
-    .select("*, services(title), packages(title)")
+    .select("*, services(title), packages(title), service_request_items(services(title))")
     .eq("id", id)
     .single();
   if (error || !r) {
@@ -278,7 +278,8 @@ async function renderRequestDetail(id) {
   const st = r.status;
   const canQuote = ["new", "contacted", "quote_sent"].includes(st);
   const closed = ["delivered", "declined", "cancelled"].includes(st);
-  const what = [r.services?.title, r.packages?.title].filter(Boolean).join(" — ") || "—";
+  const cartTitles = (r.service_request_items || []).map((it) => it.services?.title).filter(Boolean);
+  const what = [r.services?.title, r.packages?.title, ...cartTitles].filter(Boolean).join("، ") || "—";
 
   const proofHtml = proofItems.length
     ? proofItems.map((p) => `

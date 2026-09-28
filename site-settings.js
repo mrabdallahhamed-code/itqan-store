@@ -9,6 +9,8 @@
 // ============================================================
 window.ITQAN_SETTINGS = {
   contactEmail: "info@itqanbs.sa",
+  mainSiteUrl: "https://www.itqanbs.sa",
+  founded: { year: "2024", note: "شركة سعودية" },
   legal: {
     privacyUrl: "https://www.itqanbs.sa/privacy/",
     termsUrl: "https://www.itqanbs.sa/terms/",
@@ -22,6 +24,6 @@ window.ITQAN_SETTINGS = {
   ],
   ecosystem: [
     { name: "صمام",  description: "تابع طلباتك وملفاتك وتنبيهات أعمالك في مكان واحد.", url: "https://simam.itqanbs.sa" },
-    { name: "مبتدأ", description: "", url: "" },
+    { name: "مبتدأ", description: "خدمات الاستثمار الأجنبي وتأسيس الشركات لغير السعوديين.", url: "https://start.itqanbs.sa" },
   ],
 };
