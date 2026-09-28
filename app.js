@@ -63,12 +63,55 @@ const ICONS = {
 const icon = (slug) => (ICONS[slug] ? `<div class="icon-badge">${ICONS[slug]}</div>` : "");
 
 const FAQ = [
-  { q: "هل يوجد أسعار ثابتة للباقات؟", a: "لا. كل باقة تجمع مجموعة خدمات تناسب مرحلة مختلفة من عمر شركتك، لكن السعر يُحدَّد بعد فهم احتياجك الفعلي، فتصلك بعد طلبك عرض سعر واضح قبل أي التزام." },
-  { q: "ما الفرق بين الخدمات والباقات؟", a: "الخدمات توضح ماذا نقدّم بالتفصيل (دراسة، استشارة، إعادة هيكلة...)، أما الباقات فتجمع أكثر من خدمة في مسار متكامل يناسب مرحلتك: تأسيس، نمو وتوسع، أو جاهزية للاستثمار." },
-  { q: "كم تستغرق مدة تجهيز عرض السعر؟", a: "غالبًا خلال يومي عمل من استلام طلبك، وقد نتواصل معك قبلها لفهم احتياجك بدقة أكبر." },
-  { q: "هل أدفع قبل معرفة نطاق العمل والسعر؟", a: "أبدًا. لا يُطلب منك أي دفع إلا بعد أن تراجع عرض السعر ونطاق العمل وتوافق عليه صراحة." },
-  { q: "كيف أتابع حالة طلبي؟", a: "من صفحة \"تتبع طلبك\" باستخدام رقم الطلب وبريدك الإلكتروني، وتصلك أيضًا رسالة بريد عند كل مرحلة." },
+  { q: "هل يمكن إعداد دراسة لمشروع قائم؟", a: "نعم. خدماتنا تناسب المشاريع الجديدة والشركات القائمة على حد سواء، ونحدد التفاصيل بعد فهم وضعك الحالي." },
+  { q: "ما البيانات المطلوبة مني؟", a: "تختلف حسب الخدمة المطلوبة، وسنوضح لك بالضبط ما نحتاجه بعد استلام طلبك والتواصل معك." },
+  { q: "كم تستغرق الدراسة؟", a: "تختلف المدة حسب نطاق العمل وطبيعة الخدمة، وستُحدَّد بوضوح ضمن عرض السعر الذي يصلك قبل أي التزام." },
+  { q: "هل تشمل الدراسة تحليلًا ماليًا؟", a: "حسب الخدمة المطلوبة؛ دراسات الجدوى والدراسات الاستشارية غالبًا تتضمن تحليلًا ماليًا، وسنوضح ذلك تحديدًا ضمن نطاق العمل المرسل لك." },
+  { q: "هل يمكن تخصيص الدراسة حسب مشروعي؟", a: "نعم، نطاق العمل يُبنى على احتياجك ووضع مشروعك تحديدًا، وليس نموذجًا موحدًا." },
+  { q: "كيف يتم التسليم؟", a: "إلكترونيًا بعد اعتماد السداد، وتفاصيل طريقة التسليم توضَّح ضمن عرض السعر." },
+  { q: "خدمتي غير موجودة ضمن القائمة، ماذا أفعل؟", a: "استخدم خدمة \"خدمات مخصصة للشركات القائمة\"، أو اذكر احتياجك بالتفصيل عند إرسال طلب عرض السعر وسنتواصل معك." },
 ];
+
+const MOCKUP_MARKET = `
+<svg viewBox="0 0 260 170" xmlns="http://www.w3.org/2000/svg">
+  <rect width="260" height="170" fill="#FBFAF7"/>
+  <rect x="0" y="0" width="260" height="34" fill="#3A584B"/>
+  <rect x="16" y="12" width="90" height="10" rx="2" fill="#F2F0E9"/>
+  <rect x="16" y="52" width="228" height="10" rx="2" fill="#E7E3D8"/>
+  <rect x="16" y="70" width="180" height="10" rx="2" fill="#E7E3D8"/>
+  <g transform="translate(16,92)">
+    <rect x="0" y="40" width="26" height="30" fill="#BCA569"/>
+    <rect x="34" y="24" width="26" height="46" fill="#BCA569" opacity="0.8"/>
+    <rect x="68" y="10" width="26" height="60" fill="#3A584B"/>
+    <rect x="102" y="30" width="26" height="40" fill="#BCA569" opacity="0.6"/>
+    <rect x="136" y="4" width="26" height="66" fill="#3A584B" opacity="0.85"/>
+  </g>
+</svg>`;
+
+const MOCKUP_FINANCE = `
+<svg viewBox="0 0 260 170" xmlns="http://www.w3.org/2000/svg">
+  <rect width="260" height="170" fill="#FBFAF7"/>
+  <rect x="0" y="0" width="260" height="34" fill="#3A584B"/>
+  <rect x="16" y="12" width="110" height="10" rx="2" fill="#F2F0E9"/>
+  <polyline points="16,120 60,90 100,104 140,60 184,74 228,40" fill="none" stroke="#BCA569" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="228" cy="40" r="4" fill="#3A584B"/>
+  <rect x="16" y="140" width="60" height="10" rx="2" fill="#E7E3D8"/>
+  <rect x="90" y="140" width="60" height="10" rx="2" fill="#E7E3D8"/>
+  <rect x="164" y="140" width="80" height="10" rx="2" fill="#E7E3D8"/>
+</svg>`;
+
+const MOCKUP_RECOMMEND = `
+<svg viewBox="0 0 260 170" xmlns="http://www.w3.org/2000/svg">
+  <rect width="260" height="170" fill="#FBFAF7"/>
+  <rect x="0" y="0" width="260" height="34" fill="#3A584B"/>
+  <rect x="16" y="12" width="80" height="10" rx="2" fill="#F2F0E9"/>
+  <g fill="#E7E3D8">
+    <circle cx="24" cy="58" r="6" fill="#BCA569"/><rect x="40" y="53" width="200" height="10" rx="2"/>
+    <circle cx="24" cy="86" r="6" fill="#BCA569"/><rect x="40" y="81" width="180" height="10" rx="2"/>
+    <circle cx="24" cy="114" r="6" fill="#BCA569"/><rect x="40" y="109" width="200" height="10" rx="2"/>
+    <circle cx="24" cy="142" r="6" fill="#BCA569"/><rect x="40" y="137" width="150" height="10" rx="2"/>
+  </g>
+</svg>`;
 
 const HERO_ILLUSTRATION = `
   <svg class="hero-illustration" viewBox="0 0 380 260" xmlns="http://www.w3.org/2000/svg">
@@ -113,16 +156,26 @@ const HERO_ILLUSTRATION = `
     </g>
   </svg>`;
 
+let SERVICES_CACHE = null;
+let PACKAGES_CACHE = null;
 async function loadServices() {
+  if (SERVICES_CACHE) return SERVICES_CACHE;
   const { data } = await sb.from("services").select("*").eq("status", "published").order("sort_order").order("created_at");
-  return data || [];
+  SERVICES_CACHE = data || [];
+  return SERVICES_CACHE;
 }
 async function loadPackages() {
+  if (PACKAGES_CACHE) return PACKAGES_CACHE;
   const { data } = await sb.from("packages").select("*").eq("status", "published").order("sort_order").order("created_at");
-  return data || [];
+  PACKAGES_CACHE = data || [];
+  return PACKAGES_CACHE;
 }
 
 function layout(content) {
+  const svcLinks = (SERVICES_CACHE || []).slice(0, 5)
+    .map((s) => `<a href="#/service/${esc(s.slug)}">${esc(s.title)}</a>`).join("");
+  const social = SETTINGS.social || [];
+  const legal = SETTINGS.legal || {};
   app.innerHTML = `
     <header class="site-header">
       <div class="wrap">
@@ -130,26 +183,58 @@ function layout(content) {
           <span class="logo-chip"><img src="logo.png" alt="شعار اتقان لخدمات الأعمال"></span>
           <span class="brand-text">اتقان<small>استشارات ودراسات وخطط أعمال</small></span>
         </a>
-        <nav class="nav-links">
+        <nav class="nav-links" id="navLinks">
           <a href="#/">الرئيسية</a>
           <a href="#/services">الخدمات</a>
-          <a href="#/packages">الباقات</a>
-          <a href="#/track">تتبع طلبك</a>
-          <a href="#/request" class="btn btn-primary">اطلب عرض سعر</a>
+          <a href="#/how-it-works">كيف نعمل</a>
+          <a href="#/about">عن إتقان</a>
+          <a href="#/faq">الأسئلة الشائعة</a>
+          <a href="#/contact">تواصل معنا</a>
+          <a href="#/request" class="btn btn-primary">استكشف الخدمات</a>
         </nav>
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="القائمة">
+          <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round"/></svg>
+        </button>
       </div>
     </header>
     <main>${content}</main>
     <footer class="site-footer">
       <div class="wrap">
-        <a href="https://itqanbs.sa" target="_blank" rel="noopener">اتقان لخدمات الأعمال</a> — دراسات متخصصة، استشارات، إعادة هيكلة، وخطط تطوير أعمال<br>
-        © ${new Date().getFullYear()} جميع الحقوق محفوظة.
+        <div class="footer-grid">
+          <div>
+            <div class="footer-brand"><img src="logo.png" alt="اتقان"><span>اتقان لخدمات الأعمال</span></div>
+            <p class="footer-desc">دراسات متخصصة، استشارات، إعادة هيكلة، وخطط تطوير أعمال — بعرض سعر واضح قبل أي التزام.</p>
+            ${social.length ? `<div class="footer-social">${social.map((s) => `<a href="${esc(s.url)}" target="_blank" rel="noopener" title="${esc(s.name)}">${esc(s.name)}</a>`).join("")}</div>` : ""}
+          </div>
+          <div class="footer-col">
+            <h5>الخدمات</h5>
+            ${svcLinks || `<a href="#/services">كل الخدمات</a>`}
+          </div>
+          <div class="footer-col">
+            <h5>روابط</h5>
+            <a href="#/how-it-works">كيف نعمل</a>
+            <a href="#/about">عن إتقان</a>
+            <a href="#/faq">الأسئلة الشائعة</a>
+            <a href="#/track">تتبع طلبك</a>
+          </div>
+          <div class="footer-col">
+            <h5>تواصل معنا</h5>
+            <a href="mailto:${esc(SETTINGS.contactEmail || '')}">${esc(SETTINGS.contactEmail || '')}</a>
+            <a href="https://wa.me/${esc(CFG.whatsappSupportNumber)}" target="_blank" rel="noopener">واتساب</a>
+            ${legal.privacyUrl ? `<a href="${esc(legal.privacyUrl)}" target="_blank" rel="noopener">سياسة الخصوصية</a>` : ""}
+            ${legal.termsUrl ? `<a href="${esc(legal.termsUrl)}" target="_blank" rel="noopener">الشروط والأحكام</a>` : ""}
+          </div>
+        </div>
+        <div class="footer-bottom">© ${new Date().getFullYear()} اتقان لخدمات الأعمال. جميع الحقوق محفوظة.</div>
       </div>
     </footer>
     <a class="wa-float" href="https://wa.me/${esc(CFG.whatsappSupportNumber)}" target="_blank" rel="noopener" aria-label="تواصل معنا عبر واتساب" title="تواصل معنا عبر واتساب">
       <svg width="26" height="26" viewBox="0 0 32 32" fill="white"><path d="M16 3C9.4 3 4 8.4 4 15c0 2.4.7 4.6 1.9 6.5L4 29l7.7-1.9c1.8 1 3.9 1.5 6.3 1.5 6.6 0 12-5.4 12-12S22.6 3 16 3zm0 21.8c-2 0-3.9-.6-5.5-1.6l-.4-.2-4.6 1.2 1.2-4.5-.3-.4C5.4 17.7 4.8 16.4 4.8 15c0-6.2 5-11.2 11.2-11.2S27.2 8.8 27.2 15 22.2 24.8 16 24.8zm6.1-8.4c-.3-.2-2-1-2.3-1.1-.3-.1-.5-.2-.8.2-.2.3-.9 1.1-1.1 1.3-.2.2-.4.2-.7.1-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-2-1.8-2.3-.2-.3 0-.5.1-.6.1-.1.3-.4.5-.5.2-.2.2-.3.3-.5.1-.2 0-.4 0-.6-.1-.2-.8-1.9-1.1-2.6-.3-.7-.6-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.3-1.2 1.1-1.2 2.8s1.2 3.3 1.4 3.5c.2.2 2.4 3.7 5.8 5.1.8.3 1.4.6 1.9.7.8.3 1.5.2 2.1.1.6-.1 2-.8 2.3-1.6.3-.8.3-1.4.2-1.6-.1-.1-.3-.2-.6-.4z"/></svg>
     </a>
   `;
+  document.getElementById("mobileMenuBtn")?.addEventListener("click", () => {
+    document.getElementById("navLinks")?.classList.toggle("open");
+  });
 }
 
 const serviceRow = (s) => `
@@ -179,11 +264,16 @@ window.addEventListener("DOMContentLoaded", route);
 function route() {
   const { parts, params } = parseHash();
   window.scrollTo(0, 0);
+  document.getElementById("navLinks")?.classList.remove("open");
   const [page, arg] = parts;
   if (!page) return renderHome();
   if (page === "services") return renderServices();
   if (page === "service") return renderService(arg);
   if (page === "packages") return renderPackages();
+  if (page === "how-it-works") return renderHowItWorks();
+  if (page === "about") return renderAbout();
+  if (page === "faq") return renderFaqPage();
+  if (page === "contact") return renderContact();
   if (page === "request") return renderRequestForm(params);
   if (page === "done") return renderDone(arg);
   if (page === "track") return renderTrack(arg);
@@ -193,7 +283,7 @@ function route() {
 // ---------------- Home ----------------
 async function renderHome() {
   setMeta(
-    "اتقان | دراسات واستشارات وخطط تطوير الأعمال في السعودية",
+    "دراسات الجدوى واستشارات الأعمال في السعودية | إتقان",
     "دراسات متخصصة واستشارية، إعادة هيكلة، وخطط تطوير أعمال من اتقان لخدمات الأعمال. اطلب عرض سعر لمشروعك أو شركتك القائمة."
   );
   const eco = (SETTINGS.ecosystem || []).filter((e) => e.url);
@@ -201,38 +291,49 @@ async function renderHome() {
   layout(`
     <section class="hero">
       <div class="wrap">
-        <h1>نحوّل فكرتك أو شركتك إلى خطة عمل قابلة للتنفيذ</h1>
-        <p>دراسات متخصصة، استشارات، إعادة هيكلة، وخطط تطوير أعمال — يقدّمها فريق اتقان لخدمات الأعمال وفق احتياج مشروعك، بعرض سعر واضح قبل أي التزام.</p>
+        <h1>قرارات أعمال أفضل تبدأ بتحليل واضح</h1>
+        <p>دراسات واستشارات تساعدك على فهم السوق، تقييم المشروع، وتحليل الجدوى قبل اتخاذ القرار.</p>
         <div class="hero-actions">
-          <a href="#/request" class="btn btn-primary">اطلب عرض سعر</a>
-          <a href="#/services" class="btn btn-outline-light">استعرض الخدمات</a>
+          <a href="#/services" class="btn btn-primary">استكشف الخدمات</a>
+          <a href="#/" class="btn btn-outline-light" id="seeMockupsBtn">شاهد نموذجاً من أعمالنا</a>
         </div>
         <div class="hero-illustration-wrap">${HERO_ILLUSTRATION}</div>
       </div>
     </section>
-    <section class="trust-strip">
-      <div class="wrap">
-        <div class="trust-item"><span class="dot">✓</span> عرض سعر واضح قبل أي التزام</div>
-        <div class="trust-item"><span class="dot">✓</span> نطاق عمل مخصص لاحتياجك</div>
-        <div class="trust-item"><span class="dot">✓</span> فريق استشاري متخصص</div>
-        <div class="trust-item"><span class="dot">✓</span> لا يبدأ العمل ولا يُدفع شيء إلا بعد موافقتك</div>
-      </div>
-    </section>
-    <div class="wrap">
-      <div class="section-heading"><h2>كيف تعمل الخدمة</h2></div>
-      <div class="steps">
-        <div class="step"><div class="num">١</div><h4>أرسل طلبك</h4><p>عرّفنا بمشروعك وهدفك، ويمكنك اختيار خدمة أو باقة.</p></div>
-        <div class="step"><div class="num">٢</div><h4>نتواصل معك</h4><p>نفهم احتياجك ونحدد نطاق العمل المناسب.</p></div>
-        <div class="step"><div class="num">٣</div><h4>يصلك عرض السعر</h4><p>تراجعه وتوافق عليه من صفحة طلبك.</p></div>
-        <div class="step"><div class="num">٤</div><h4>تحويل وبدء العمل</h4><p>تحوّل المبلغ، ونبدأ التنفيذ فور اعتماد السداد.</p></div>
-      </div>
 
-      <div class="section-heading"><h2>خدماتنا</h2><a href="#/services" class="count">كل الخدمات ←</a></div>
+    <div class="wrap">
+      <div class="section-heading" style="margin-top:44px;"><h2>اختر الخدمة التي تحتاجها</h2><a href="#/services" class="count">كل الخدمات ←</a></div>
       <div id="homeServices" class="service-index"><div class="loading">جارِ التحميل…</div></div>
 
-      <div class="section-heading"><h2>الباقات</h2><a href="#/packages" class="count">تفاصيل الباقات ←</a></div>
-      <p class="note-muted">الخدمات توضح ماذا نقدّم، والباقات تجمع مجموعة خدمات تناسب مرحلة شركتك — بلا أسعار ثابتة، نحدد العرض بعد فهم احتياجك.</p>
-      <div id="homePackages" class="pkg-grid"><div class="loading">جارِ التحميل…</div></div>
+      <div class="section-heading"><h2>ماذا تحصل عليه عند طلب الدراسة؟</h2></div>
+      <div class="get-grid">
+        ${["تحليل السوق","تحليل المنافسين","النموذج المالي","تقدير التكاليف","الإيرادات المتوقعة","نقطة التعادل","مؤشرات الجدوى","المخاطر","التوصيات"]
+          .map((t) => `<div class="get-tile"><div class="g-icon">${ICONS["specialized-studies"]}</div>${esc(t)}</div>`).join("")}
+      </div>
+
+      <div class="section-heading" id="mockupsSection"><h2>شاهد نموذجاً من مخرجاتنا</h2></div>
+      <p class="mockup-note">نماذج توضيحية لشكل التقرير وليست دراسة فعلية — لفهم طريقة العرض قبل الطلب.</p>
+      <div class="mockup-grid">
+        <div class="mockup-card">${MOCKUP_MARKET}<div class="mockup-caption">نموذج: صفحة تحليل السوق</div></div>
+        <div class="mockup-card">${MOCKUP_FINANCE}<div class="mockup-caption">نموذج: التحليل المالي والرسوم البيانية</div></div>
+        <div class="mockup-card">${MOCKUP_RECOMMEND}<div class="mockup-caption">نموذج: صفحة التوصيات</div></div>
+      </div>
+
+      <div class="section-heading"><h2>لماذا إتقان؟</h2></div>
+      <div class="why-grid">
+        <div class="why-card"><div class="icon-badge">${ICONS["advisory-studies"]}</div><h4>تحليل عملي</h4><p>نركز على المعلومات التي تساعدك في اتخاذ القرار.</p></div>
+        <div class="why-card"><div class="icon-badge">${ICONS["restructuring"]}</div><h4>فهم للسوق السعودي</h4><p>نراعي بيئة الأعمال والسوق في المملكة.</p></div>
+        <div class="why-card"><div class="icon-badge">${ICONS["specialized-studies"]}</div><h4>مخرجات واضحة</h4><p>الدراسة ليست مجرد صفحات؛ بل تحليل وتوصيات.</p></div>
+        <div class="why-card"><div class="icon-badge">${ICONS["custom-corporate-services"]}</div><h4>حلول حسب احتياج المشروع</h4><p>يمكن تخصيص الخدمة حسب طبيعة المشروع وهدف العميل.</p></div>
+      </div>
+
+      <div class="section-heading"><h2>كيف تحصل على الخدمة؟</h2></div>
+      <div class="steps">
+        <div class="step"><div class="num">١</div><h4>اختر الخدمة</h4><p>تصفّح الخدمات واختر ما يناسب احتياجك، أو اطلب عرض سعر مباشرة.</p></div>
+        <div class="step"><div class="num">٢</div><h4>أرسل بيانات مشروعك</h4><p>عرّفنا بمشروعك وهدفك من الخدمة.</p></div>
+        <div class="step"><div class="num">٣</div><h4>نقوم بالتحليل والإعداد</h4><p>نتواصل معك لفهم النطاق، ويصلك عرض سعر واضح قبل البدء.</p></div>
+        <div class="step"><div class="num">٤</div><h4>تستلم المخرجات</h4><p>بعد اعتماد السداد، يبدأ التنفيذ وتستلم دراستك إلكترونيًا.</p></div>
+      </div>
 
       ${eco.length ? `
         <div class="section-heading"><h2>منظومة اتقان</h2></div>
@@ -253,12 +354,18 @@ async function renderHome() {
           <div class="faq-a"><p>${esc(f.a)}</p></div>
         </div>`).join("")}</div>
     </div>
+
     <section class="cta-band">
-      <h2>جاهز تبدأ؟</h2>
-      <p>أرسل طلبك اليوم، وسيتواصل معك فريقنا بعرض سعر واضح.</p>
-      <a href="#/request" class="btn btn-primary">اطلب عرض سعر</a>
+      <h2>هل لديك مشروع وتحتاج إلى صورة أوضح قبل اتخاذ القرار؟</h2>
+      <p>اختر الخدمة المناسبة وابدأ طلبك.</p>
+      <a href="#/services" class="btn btn-primary">استكشف الخدمات</a>
     </section>
   `);
+
+  document.getElementById("seeMockupsBtn")?.addEventListener("click", (e) => {
+    e.preventDefault();
+    document.getElementById("mockupsSection")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
 
   const [services, packages] = await Promise.all([loadServices(), loadPackages()]);
   const sEl = document.getElementById("homeServices");
@@ -328,6 +435,14 @@ async function renderService(slug) {
           <h1 class="pd-title" style="margin-top:14px;">${esc(s.title)}</h1>
           <p class="service-lede">${esc(s.full_description || s.short_description)}</p>
 
+          ${(s.target_customer || s.duration_note || s.requirements_note || s.delivery_note) ? `
+            <div class="svc-meta">
+              ${s.target_customer ? `<div class="svc-meta-item"><div class="k">لمن تناسب هذه الخدمة</div><div class="v">${esc(s.target_customer)}</div></div>` : ""}
+              ${s.duration_note ? `<div class="svc-meta-item"><div class="k">مدة التنفيذ</div><div class="v">${esc(s.duration_note)}</div></div>` : ""}
+              ${s.requirements_note ? `<div class="svc-meta-item"><div class="k">المتطلبات منك</div><div class="v">${esc(s.requirements_note)}</div></div>` : ""}
+              ${s.delivery_note ? `<div class="svc-meta-item"><div class="k">طريقة التسليم</div><div class="v">${esc(s.delivery_note)}</div></div>` : ""}
+            </div>` : ""}
+
           ${items.length ? `
             <div class="pd-block">
               <h4>ما تحصل عليه</h4>
@@ -389,7 +504,79 @@ async function renderPackages() {
     : `<div class="empty-state">لا توجد باقات منشورة حاليًا.</div>`;
 }
 
-// ---------------- Request form ----------------
+// ---------------- صفحات ثابتة (كيف نعمل / عن إتقان / الأسئلة الشائعة / تواصل معنا) ----------------
+function renderHowItWorks() {
+  setMeta("كيف نعمل | اتقان", "أربع خطوات بسيطة من طلب الخدمة حتى استلام المخرجات.");
+  layout(`
+    <div class="wrap">
+      <div class="section-heading" style="margin-top:40px;"><h2>كيف تحصل على الخدمة؟</h2></div>
+      <div class="steps">
+        <div class="step"><div class="num">١</div><h4>اختر الخدمة</h4><p>تصفّح الخدمات واختر ما يناسب احتياجك، أو اطلب عرض سعر مباشرة.</p></div>
+        <div class="step"><div class="num">٢</div><h4>أرسل بيانات مشروعك</h4><p>عرّفنا بمشروعك وهدفك من الخدمة.</p></div>
+        <div class="step"><div class="num">٣</div><h4>نقوم بالتحليل والإعداد</h4><p>نتواصل معك لفهم النطاق، ويصلك عرض سعر واضح قبل البدء.</p></div>
+        <div class="step"><div class="num">٤</div><h4>تستلم المخرجات</h4><p>بعد اعتماد السداد، يبدأ التنفيذ وتستلم دراستك إلكترونيًا.</p></div>
+      </div>
+      <div class="cta-band" style="margin-top:12px;">
+        <h2>جاهز تبدأ؟</h2>
+        <a href="#/services" class="btn btn-primary">استكشف الخدمات</a>
+      </div>
+    </div>`);
+}
+
+function renderAbout() {
+  setMeta("عن إتقان | اتقان لخدمات الأعمال", "اتقان لخدمات الأعمال، دراسات واستشارات لأصحاب المشاريع والشركات القائمة في السعودية.");
+  layout(`
+    <div class="wrap">
+      <div class="section-heading" style="margin-top:40px;"><h2>عن إتقان</h2></div>
+      <p class="service-lede">اتقان لخدمات الأعمال تقدّم دراسات واستشارات لأصحاب المشاريع الجديدة والشركات القائمة في السوق السعودي، بهدف مساعدتهم على اتخاذ قرارات أعمال مبنية على تحليل واضح لا على تخمين.</p>
+      <div class="why-grid">
+        <div class="why-card"><div class="icon-badge">${ICONS["advisory-studies"]}</div><h4>تحليل عملي</h4><p>نركز على المعلومات التي تساعدك في اتخاذ القرار.</p></div>
+        <div class="why-card"><div class="icon-badge">${ICONS["restructuring"]}</div><h4>فهم للسوق السعودي</h4><p>نراعي بيئة الأعمال والسوق في المملكة.</p></div>
+        <div class="why-card"><div class="icon-badge">${ICONS["specialized-studies"]}</div><h4>مخرجات واضحة</h4><p>الدراسة ليست مجرد صفحات؛ بل تحليل وتوصيات.</p></div>
+        <div class="why-card"><div class="icon-badge">${ICONS["custom-corporate-services"]}</div><h4>حلول حسب احتياج المشروع</h4><p>يمكن تخصيص الخدمة حسب طبيعة المشروع وهدف العميل.</p></div>
+      </div>
+      <a href="#/services" class="btn btn-primary btn-inline">استكشف الخدمات</a>
+    </div>`);
+}
+
+function renderFaqPage() {
+  setMeta("الأسئلة الشائعة | اتقان", "إجابات على أكثر الأسئلة شيوعًا حول خدمات اتقان وطريقة الطلب والتسليم.");
+  layout(`
+    <div class="wrap">
+      <div class="section-heading" style="margin-top:40px;"><h2>الأسئلة الشائعة</h2></div>
+      <div class="faq-section" id="faqSection">${FAQ.map((f, i) => `
+        <div class="faq-item" data-i="${i}">
+          <button class="faq-q">${esc(f.q)}<span class="plus">+</span></button>
+          <div class="faq-a"><p>${esc(f.a)}</p></div>
+        </div>`).join("")}</div>
+    </div>`);
+  document.getElementById("faqSection")?.querySelectorAll(".faq-item").forEach((item) => {
+    item.querySelector(".faq-q").addEventListener("click", () => item.classList.toggle("open"));
+  });
+  injectSchema("faq-schema", {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQ.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+  });
+}
+
+function renderContact() {
+  setMeta("تواصل معنا | اتقان", "تواصل مع فريق اتقان لخدمات الأعمال عبر واتساب أو البريد الإلكتروني، أو أرسل طلب عرض سعر مباشرة.");
+  const social = SETTINGS.social || [];
+  layout(`
+    <div class="center-page">
+      <h2 style="font-family:var(--font-display);">تواصل معنا</h2>
+      <p style="color:var(--slate);">تواصل مع فريق اتقان مباشرة، أو أرسل طلبك وسنتواصل معك.</p>
+      <div class="hero-actions" style="justify-content:center;margin-top:18px;">
+        <a href="https://wa.me/${esc(CFG.whatsappSupportNumber)}" target="_blank" rel="noopener" class="btn btn-primary">تواصل عبر واتساب</a>
+        <a href="mailto:${esc(SETTINGS.contactEmail || '')}" class="btn btn-outline-light">${esc(SETTINGS.contactEmail || '')}</a>
+      </div>
+      <a href="#/request" class="btn btn-ghost btn-inline" style="margin-top:14px;">أو أرسل طلب عرض سعر مباشرة</a>
+      ${social.length ? `<div class="footer-social" style="justify-content:center;margin-top:28px;">${social.map((s) => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}</a>`).join("")}</div>` : ""}
+    </div>`);
+}
+
+
 async function renderRequestForm(params) {
   setMeta("اطلب عرض سعر | اتقان", "أرسل طلبك وسيتواصل معك فريق اتقان بعرض سعر واضح.");
   layout(`<div class="wrap"><div class="loading">جارِ التحميل…</div></div>`);

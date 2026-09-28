@@ -444,8 +444,8 @@ async function renderRequestDetail(id) {
 
 // ---------------- Services / Packages management ----------------
 const CONTENT = {
-  services: { label: "الخدمات", single: "خدمة", audience: false },
-  packages: { label: "الباقات", single: "باقة", audience: true },
+  services: { label: "الخدمات", single: "خدمة", audience: false, svcFields: true },
+  packages: { label: "الباقات", single: "باقة", audience: true, svcFields: false },
 };
 
 async function renderContentList(table) {
@@ -481,7 +481,7 @@ async function renderContentList(table) {
 
 async function renderContentForm(table, id) {
   const meta = CONTENT[table];
-  let x = { slug: "", title: "", short_description: "", full_description: "", audience: "", items: [], sort_order: 0, status: "draft" };
+  let x = { slug: "", title: "", short_description: "", full_description: "", audience: "", items: [], sort_order: 0, status: "draft", target_customer: "", duration_note: "", requirements_note: "", delivery_note: "" };
   if (id) {
     const { data } = await sb.from(table).select("*").eq("id", id).single();
     if (data) x = data;
@@ -497,6 +497,13 @@ async function renderContentForm(table, id) {
       <div class="field"><label>وصف مختصر</label><textarea name="short_description">${esc(x.short_description)}</textarea></div>
       <div class="field"><label>الوصف الكامل</label><textarea name="full_description" rows="5">${esc(x.full_description)}</textarea></div>
       ${meta.audience ? `<div class="field"><label>لمن تناسب</label><input name="audience" value="${esc(x.audience)}"></div>` : ""}
+      ${meta.svcFields ? `
+        <div class="field"><label>لمن تناسب هذه الخدمة (اختياري)</label><input name="target_customer" value="${esc(x.target_customer || "")}" placeholder="مثال: أصحاب المشاريع الجديدة والشركات القائمة"></div>
+        <div class="form-row-2">
+          <div class="field"><label>مدة التنفيذ (اختياري، اتركه فارغًا إن لم تحدَّد بعد)</label><input name="duration_note" value="${esc(x.duration_note || "")}" placeholder="مثال: تُحدَّد ضمن عرض السعر"></div>
+          <div class="field"><label>طريقة التسليم (اختياري)</label><input name="delivery_note" value="${esc(x.delivery_note || "")}" placeholder="مثال: تسليم إلكتروني بعد اعتماد السداد"></div>
+        </div>
+        <div class="field"><label>المتطلبات من العميل (اختياري)</label><textarea name="requirements_note">${esc(x.requirements_note || "")}</textarea></div>` : ""}
       <div class="field"><label>ما تشمله (كل بند في سطر)</label>
         <textarea name="items_text" rows="6">${esc((Array.isArray(x.items) ? x.items : []).join("\n"))}</textarea></div>
       <div class="form-row-2">
@@ -526,6 +533,12 @@ async function renderContentForm(table, id) {
       status: fd.get("status"),
     };
     if (meta.audience) payload.audience = fd.get("audience") || null;
+    if (meta.svcFields) {
+      payload.target_customer = fd.get("target_customer") || null;
+      payload.duration_note = fd.get("duration_note") || null;
+      payload.requirements_note = fd.get("requirements_note") || null;
+      payload.delivery_note = fd.get("delivery_note") || null;
+    }
 
     const { error } = id
       ? await sb.from(table).update(payload).eq("id", id)
