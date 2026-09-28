@@ -71,18 +71,45 @@ const FAQ = [
 ];
 
 const HERO_ILLUSTRATION = `
-  <svg class="hero-illustration" viewBox="0 0 320 160" xmlns="http://www.w3.org/2000/svg">
-    <g fill="none" stroke="#C9A66B" stroke-width="1.4" opacity="0.9">
-      <rect x="14" y="70" width="34" height="70" rx="2"/>
-      <rect x="60" y="46" width="34" height="94" rx="2"/>
-      <rect x="106" y="20" width="34" height="120" rx="2"/>
-      <path d="M14 60 48 60 82 34 116 12" stroke="#F7F4EC" stroke-width="0" />
-      <path d="M20 64 54 40 88 26 124 8" stroke-linecap="round"/>
-      <circle cx="124" cy="8" r="3" fill="#C9A66B" stroke="none"/>
+  <svg class="hero-illustration" viewBox="0 0 380 260" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="barG" x1="0" y1="1" x2="0" y2="0">
+        <stop offset="0" stop-color="#C9A66B"/><stop offset="1" stop-color="#EFDDB4"/>
+      </linearGradient>
+      <linearGradient id="cardG" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#4E6B54"/><stop offset="1" stop-color="#3B5240"/>
+      </linearGradient>
+    </defs>
+    <circle cx="300" cy="46" r="64" fill="#ffffff" opacity="0.06"/>
+    <circle cx="46" cy="220" r="40" fill="#C9A66B" opacity="0.15"/>
+
+    <g>
+      <rect x="18" y="150" width="36" height="80" rx="6" fill="url(#barG)" opacity="0.9"/>
+      <rect x="64" y="118" width="36" height="112" rx="6" fill="url(#barG)"/>
+      <rect x="110" y="70" width="36" height="160" rx="6" fill="#F4E6C6"/>
+      <path d="M20 140 66 104 112 60 150 34" stroke="#ffffff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+      <circle cx="150" cy="34" r="6" fill="#ffffff"/>
     </g>
-    <g fill="none" stroke="#C6CEDB" stroke-width="1.2" opacity="0.55">
-      <rect x="176" y="24" width="130" height="112" rx="4"/>
-      <path d="M192 48h98M192 64h98M192 80h68M192 96h98M192 112h50" stroke-linecap="round"/>
+
+    <g transform="translate(178,36)">
+      <rect x="0" y="0" width="176" height="200" rx="16" fill="#ffffff" opacity="0.97"/>
+      <rect x="0" y="0" width="176" height="40" rx="16" fill="url(#cardG)"/>
+      <rect x="0" y="24" width="176" height="16" fill="url(#cardG)"/>
+      <circle cx="24" cy="20" r="8" fill="#F4E6C6"/>
+      <rect x="42" y="16" width="90" height="8" rx="4" fill="#ffffff" opacity="0.85"/>
+      <rect x="22" y="60" width="132" height="10" rx="5" fill="#EFEADD"/>
+      <rect x="22" y="80" width="132" height="10" rx="5" fill="#EFEADD"/>
+      <rect x="22" y="100" width="92" height="10" rx="5" fill="#EFEADD"/>
+      <g transform="translate(20,126)">
+        <circle cx="10" cy="10" r="10" fill="#C9A66B"/>
+        <path d="M5.5 10.2l3 3 6.5-6.6" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="28" y="4" width="100" height="12" rx="6" fill="#F7F4EC"/>
+      </g>
+      <g transform="translate(20,154)">
+        <circle cx="10" cy="10" r="10" fill="#C9A66B"/>
+        <path d="M5.5 10.2l3 3 6.5-6.6" stroke="#ffffff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <rect x="28" y="4" width="76" height="12" rx="6" fill="#F7F4EC"/>
+      </g>
     </g>
   </svg>`;
 
@@ -180,7 +207,7 @@ async function renderHome() {
           <a href="#/request" class="btn btn-primary">اطلب عرض سعر</a>
           <a href="#/services" class="btn btn-outline-light">استعرض الخدمات</a>
         </div>
-        ${HERO_ILLUSTRATION}
+        <div class="hero-illustration-wrap">${HERO_ILLUSTRATION}</div>
       </div>
     </section>
     <section class="trust-strip">
