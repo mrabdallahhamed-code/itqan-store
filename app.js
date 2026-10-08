@@ -273,7 +273,10 @@ const packageCard = (k) => {
     ${k.audience ? `<div class="pkg-aud"><b>إذا كنت:</b> ${esc(k.audience)}</div>` : ""}
     ${svcs.length ? `
       <div class="stage-label">الخدمات المقترحة لك</div>
-      <div class="stage-svcs">${svcs.map((x) => `<a href="#/service/${esc(x.slug)}" class="stage-svc"><span class="tick">✓</span>${esc(x.title)}</a>`).join("")}</div>`
+      <div class="stage-svcs">
+        ${svcs.map((x) => `<a href="#/service/${esc(x.slug)}" class="stage-svc"><span class="tick">✓</span>${esc(x.title)}</a>`).join("")}
+        ${listItems(k).map((i) => `<div class="stage-svc stage-extra"><span class="tick">✓</span>${esc(i)}</div>`).join("")}
+      </div>`
     : `<ul class="contents-list">${listItems(k).map((i) => `<li>${esc(i)}</li>`).join("")}</ul>`}
     ${svcs.length
       ? `<button class="btn btn-primary stage-btn" data-stage="${esc(k.slug)}">اطلب هذه الخدمات معًا</button>
@@ -288,7 +291,9 @@ function wireStageButtons(container, packages) {
       const k = packages.find((p) => p.slug === btn.dataset.stage);
       if (!k) return;
       stageServices(k).forEach((x) => addToCart({ id: x.id, slug: x.slug, title: x.title }));
-      try { sessionStorage.setItem("itqan_stage", k.title); } catch (_) {}
+      const extras = listItems(k);
+      const label = k.title + (extras.length ? ` — يشمل أيضًا: ${extras.join("، ")}` : "");
+      try { sessionStorage.setItem("itqan_stage", label); } catch (_) {}
       location.hash = "#/cart";
     });
   });
@@ -712,7 +717,9 @@ function renderCart() {
       wrap.innerHTML = `<div class="empty-state">قائمة طلبك فارغة. <a href="#/services">تصفح الخدمات</a></div>`;
       return;
     }
+    let st = null; try { st = sessionStorage.getItem("itqan_stage"); } catch (_) {}
     wrap.innerHTML = `
+      ${st ? `<div class="notice" style="margin-bottom:12px;">المسار المختار: ${esc(st)}</div>` : ""}
       <div class="summary-box" style="margin-bottom:20px;">
         ${CART.map((i) => `
           <div class="summary-row">
