@@ -77,16 +77,25 @@ const listItems = (x) => (Array.isArray(x.items) ? x.items : []);
 
 // ---------------- أيقونات مصممة (SVG أصلية، لا صور خارجية) ----------------
 const ICONS = {
-  "specialized-studies": `<svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z" stroke-linejoin="round"/><path d="M15 3v4h4M9 12h6M9 15h6M9 9h2" stroke-linecap="round"/></svg>`,
-  "advisory-studies": `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-  "restructuring": `<svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.4"/><circle cx="18" cy="6" r="2.4"/><circle cx="12" cy="18" r="2.4"/><path d="M8 7.3 11 16M16 7.3 13 16M6 8.4V12M18 8.4V12" stroke-linecap="round"/></svg>`,
-  "business-development-plans": `<svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M4 19h16" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 12l4-4 4 3 6-7" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-  "custom-corporate-services": `<svg viewBox="0 0 24 24"><path d="M12 3 3 7.5 12 12l9-4.5L12 3Z" stroke-linejoin="round"/><path d="M3 12l9 4.5 9-4.5M3 16.5 12 21l9-4.5" stroke-linejoin="round"/></svg>`,
-  "foundation": `<svg viewBox="0 0 24 24"><path d="M4 21h16M6 21V10M18 21V10M4 10l8-6 8 6" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 21v-6h4v6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-  "development": `<svg viewBox="0 0 24 24"><path d="M4 17 10 11 14 15 20 9" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 9h5v5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-  "business-valuation": `<svg viewBox="0 0 24 24"><path d="M12 3v18M5 7h14" stroke-linecap="round"/><path d="M5 7l-3 6a3 3 0 0 0 6 0L5 7ZM19 7l-3 6a3 3 0 0 0 6 0l-3-6Z" stroke-linejoin="round"/><path d="M8 21h8" stroke-linecap="round"/></svg>`,
-  "family-business": `<svg viewBox="0 0 24 24"><circle cx="8" cy="7" r="2.5"/><circle cx="16" cy="7" r="2.5"/><circle cx="12" cy="13" r="2"/><path d="M3.5 20c0-3 2-5 4.5-5M20.5 20c0-3-2-5-4.5-5M8.5 20c0-2 1.6-3.5 3.5-3.5s3.5 1.5 3.5 3.5" stroke-linecap="round"/></svg>`,
-  "readiness": `<svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z" stroke-linejoin="round"/><path d="m8.5 12 2.5 2.5L16 9" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  // دراسات الجدوى والسوق: تقرير + أعمدة + عدسة
+  "specialized-studies": `<svg viewBox="0 0 24 24"><path class="d" d="M5 3.5h8.5L17 7v6.2a5 5 0 0 0-5.6 7.3H5z"/><path d="M13.5 3.5H5v17h6.4M13.5 3.5 17 7M13.5 3.5V7H17v5" stroke-linejoin="round"/><path d="M8 16v-2.5M10.5 16v-5M8 9h4" stroke-linecap="round"/><circle cx="16" cy="17" r="3"/><path d="m18.2 19.2 2.3 2.3" stroke-linecap="round"/></svg>`,
+  // تشخيص وحلول: بوصلة
+  "advisory-studies": `<svg viewBox="0 0 24 24"><circle class="d" cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="9"/><path d="m15.6 8.4-2.2 5-5 2.2 2.2-5z" stroke-linejoin="round"/><circle cx="12" cy="12" r="1" fill="currentColor"/><path d="M12 3v1.6M12 19.4V21M3 12h1.6M19.4 12H21" stroke-linecap="round"/></svg>`,
+  // إعادة الهيكلة وتطوير الأعمال: هيكل تنظيمي + سهم نمو
+  "business-development-plans": `<svg viewBox="0 0 24 24"><rect class="d" x="9" y="3" width="6" height="5" rx="1.2"/><rect x="9" y="3" width="6" height="5" rx="1.2"/><rect x="3" y="15" width="6" height="5" rx="1.2"/><path d="M12 8v3.5M6 15v-3.5h6" stroke-linecap="round" stroke-linejoin="round"/><path d="m13.5 19 3-3.5 2 1.8 3-4" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.2 13.2h2.3v2.3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  "restructuring": `<svg viewBox="0 0 24 24"><rect class="d" x="9" y="3" width="6" height="5" rx="1.2"/><rect x="9" y="3" width="6" height="5" rx="1.2"/><rect x="3" y="15" width="6" height="5" rx="1.2"/><rect x="15" y="15" width="6" height="5" rx="1.2"/><path d="M12 8v3.5M6 15v-3.5h12V15" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  // خدمات مخصصة: قطعة أحجية
+  "custom-corporate-services": `<svg viewBox="0 0 24 24"><path class="d" d="M4 8h4a2 2 0 1 1 4 0h4v4a2 2 0 1 1 0 4v4H4z"/><path d="M4 8h4a2 2 0 1 1 4 0h4v4a2 2 0 1 1 0 4v4h-4a2 2 0 1 0-4 0H4z" stroke-linejoin="round"/></svg>`,
+  // التقييم: ميزان
+  "business-valuation": `<svg viewBox="0 0 24 24"><path class="d" d="M2.8 13h6.4a3.2 3.2 0 0 1-6.4 0ZM14.8 13h6.4a3.2 3.2 0 0 1-6.4 0Z"/><path d="M12 4v16M8 20h8M5 7.5h14" stroke-linecap="round"/><circle cx="12" cy="4.5" r="1.3"/><path d="M6 7.5 2.8 13h6.4zM18 7.5 14.8 13h6.4z" stroke-linejoin="round"/><path d="M2.8 13a3.2 3.2 0 0 0 6.4 0M14.8 13a3.2 3.2 0 0 0 6.4 0"/></svg>`,
+  // المراحل
+  "foundation": `<svg viewBox="0 0 24 24"><path class="d" d="M4 21V11l8-6 8 6v10z"/><path d="M3 11.5 12 5l9 6.5M5 10v11h14V10M3 21h18" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 21v-5h4v5M12 5V2.5l3 1.2-3 1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  "development": `<svg viewBox="0 0 24 24"><path class="d" d="M12 13c0-4 2.8-7 7-7 0 4-2.8 7-7 7ZM12 15c0-3-2.2-5.5-6-5.5 0 3 2.2 5.5 6 5.5Z"/><path d="M12 21v-8m0 0c0-4 2.8-7 7-7 0 4-2.8 7-7 7Zm0 2c0-3-2.2-5.5-6-5.5 0 3 2.2 5.5 6 5.5Z" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 21h10" stroke-linecap="round"/></svg>`,
+  "readiness": `<svg viewBox="0 0 24 24"><ellipse class="d" cx="9" cy="17" rx="6" ry="2.5"/><ellipse cx="9" cy="17" rx="6" ry="2.5"/><path d="M3 17v-3.5C3 12.1 5.7 11 9 11s6 1.1 6 2.5V17M3 13.5c0 1.4 2.7 2.5 6 2.5s6-1.1 6-2.5" stroke-linejoin="round"/><path d="M17 11V3.5M14 6.5l3-3 3 3" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  // عامة
+  "shield": `<svg viewBox="0 0 24 24"><path class="d" d="M12 3 4.5 6v5.5c0 4.6 3.2 7.8 7.5 9 4.3-1.2 7.5-4.4 7.5-9V6z"/><path d="M12 3 4.5 6v5.5c0 4.6 3.2 7.8 7.5 9 4.3-1.2 7.5-4.4 7.5-9V6z" stroke-linejoin="round"/><path d="m8.8 12 2.3 2.3 4.2-4.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  "map": `<svg viewBox="0 0 24 24"><path class="d" d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"/><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.3"/></svg>`,
+  "receipt": `<svg viewBox="0 0 24 24"><path class="d" d="M5 3h14v18l-2.3-1.5L14.3 21 12 19.5 9.7 21l-2.4-1.5L5 21z"/><path d="M5 3h14v18l-2.3-1.5L14.3 21 12 19.5 9.7 21l-2.4-1.5L5 21z" stroke-linejoin="round"/><path d="M8.5 8h7M8.5 11.5h7M8.5 15h4" stroke-linecap="round"/></svg>`,
 };
 const icon = (slug) => (ICONS[slug] ? `<div class="icon-badge">${ICONS[slug]}</div>` : "");
 
@@ -105,7 +114,7 @@ const LOAD_ERR = `<div class="notice error">تعذّر تحميل المحتوى
 
 // خطوات العمل — مصدر واحد تستخدمه الرئيسية وصفحة "كيف نعمل"
 const STEPS_HTML = `
-  <div class="steps">
+  <div class="steps steps-line">
     <div class="step"><div class="num">١</div><h4>اختر الخدمة</h4><p>تصفّح الخدمات وأضف ما يناسبك لقائمة طلبك، أو اطلب عرض سعر مباشرة.</p></div>
     <div class="step"><div class="num">٢</div><h4>أرسل بيانات مشروعك</h4><p>عرّفنا بمشروعك وهدفك من الخدمة.</p></div>
     <div class="step"><div class="num">٣</div><h4>يصلك عرض سعر واضح</h4><p>نتواصل معك لفهم النطاق، ثم يصلك عرض سعر قبل أي التزام.</p></div>
@@ -231,10 +240,11 @@ function layout(content) {
   updateCartBadge();
 }
 
-const serviceTile = (s) => `
+const AR_NUM = (n) => String(n).padStart(2, "0").replace(/\d/g, (d) => "٠١٢٣٤٥٦٧٨٩"[d]);
+const serviceTile = (s, i = 0) => `
   <div class="shop-tile" data-id="${esc(s.id)}">
     <a href="#/service/${esc(s.slug)}" class="shop-tile-link">
-      <div class="shop-tile-top"><span class="row-icon">${ICONS[s.slug] || ""}</span></div>
+      <div class="shop-tile-top"><span class="row-icon">${ICONS[s.slug] || ICONS["custom-corporate-services"]}</span><span class="tile-num">${AR_NUM(i + 1)}</span></div>
       <div class="shop-tile-body">
         <h3 class="service-row-title">${esc(s.title)}</h3>
         <p class="service-row-desc">${esc(s.short_description)}</p>
@@ -263,11 +273,11 @@ const stageServices = (k) => {
   const slugs = Array.isArray(k.service_slugs) ? k.service_slugs : [];
   return slugs.map((sl) => all.find((x) => x.slug === sl)).filter(Boolean);
 };
-const packageCard = (k) => {
+const packageCard = (k, i = 0) => {
   const svcs = stageServices(k);
   return `
-  <div class="pkg-card">
-    ${icon(k.slug)}
+  <div class="pkg-card ${i === 1 ? "featured" : ""}">
+    <div class="pkg-head">${icon(k.slug) || icon("foundation")}<span class="pkg-step">المرحلة ${["الأولى","الثانية","الثالثة","الرابعة","الخامسة"][i] || ""}</span></div>
     <h3>${esc(k.title)}</h3>
     <p class="pkg-sub">${esc(k.short_description)}</p>
     ${k.audience ? `<div class="pkg-aud"><b>إذا كنت:</b> ${esc(k.audience)}</div>` : ""}
@@ -332,25 +342,34 @@ async function renderHome() {
 
   layout(`
     <section class="hero">
-      <div class="wrap">
-        <h1>قرارات أعمال أفضل تبدأ بتحليل واضح</h1>
-        <p>دراسات واستشارات تساعدك على فهم السوق، تقييم المشروع، وتحليل الجدوى قبل اتخاذ القرار.</p>
-        <div class="hero-actions">
-          <a href="#/services" class="btn btn-primary">تصفح الخدمات</a>
-          <a href="#/service/business-valuation" class="btn btn-outline-light">تقييم الشركات العائلية</a>
+      <div class="hero-pattern" aria-hidden="true"></div>
+      <div class="wrap hero-grid">
+        <div>
+          <span class="eyebrow eyebrow-light">اتقان لخدمات الأعمال</span>
+          <h1>قرارات أعمال أفضل<br><span class="hl">تبدأ بتحليل واضح</span></h1>
+          <p>دراسات واستشارات تساعدك على فهم السوق، تقييم المشروع، وتحليل الجدوى قبل اتخاذ القرار.</p>
+          <div class="hero-actions">
+            <a href="#/services" class="btn btn-primary">تصفح الخدمات</a>
+            <a href="#/packages" class="btn btn-outline-light">ابدأ حسب وضعك</a>
+          </div>
+        </div>
+        <div class="hero-card">
+          <div class="hero-card-row"><span class="hc-ic">${ICONS.receipt}</span><div><b>عرض سعر واضح</b><small>قبل أي التزام منك</small></div></div>
+          <div class="hero-card-row"><span class="hc-ic">${ICONS.map}</span><div><b>فهم للسوق السعودي</b><small>تحليل مبني على بيئة الأعمال في المملكة</small></div></div>
+          <div class="hero-card-row"><span class="hc-ic">${ICONS.shield}</span><div><b>سرية تامة</b><small>بيانات شركتك لا تخرج عن فريق العمل</small></div></div>
         </div>
       </div>
     </section>
 
     <div class="wrap">
-      <div class="section-heading" style="margin-top:36px;"><h2>خدماتنا</h2><a href="#/services" class="count">عرض الكل ←</a></div>
+      <div class="section-heading"><div class="sh-text"><span class="eyebrow">ماذا نقدّم</span><h2>خدماتنا</h2></div><a href="#/services" class="count">عرض الكل ←</a></div>
       <div id="homeServices" class="shop-grid"><div class="loading">جارِ التحميل…</div></div>
 
-      <div class="section-heading"><h2>لا تعرف من أين تبدأ؟ ابدأ حسب وضعك</h2><a href="#/packages" class="count">التفاصيل ←</a></div>
+      <div class="section-heading"><div class="sh-text"><span class="eyebrow">لا تعرف من أين تبدأ؟</span><h2>ابدأ حسب وضعك</h2></div><a href="#/packages" class="count">التفاصيل ←</a></div>
       <p class="note-muted">اختر الوضع الأقرب لك، وسنقترح عليك الخدمات المناسبة لمرحلتك.</p>
       <div id="homePackages" class="pkg-grid"><div class="loading">جارِ التحميل…</div></div>
 
-      <div class="section-heading"><h2>مثال: ماذا تتضمن دراسة الجدوى؟</h2></div>
+      <div class="section-heading"><div class="sh-text"><span class="eyebrow">مثال</span><h2>ماذا تتضمن دراسة الجدوى؟</h2></div></div>
       <p class="note-muted">لكل خدمة مخرجاتها الخاصة الموضحة في صفحتها؛ هذا مثال لما تشمله دراسة الجدوى عادةً.</p>
       <div class="get-panel">
         <div class="get-list">
@@ -366,10 +385,10 @@ async function renderHome() {
         ${SETTINGS.mainSiteUrl ? `<a href="${esc(SETTINGS.mainSiteUrl)}" target="_blank" rel="noopener" class="trust-bar-link">تعرّف على اتقان ←</a>` : ""}
       </div>
 
-      <div class="section-heading"><h2>كيف تحصل على الخدمة؟</h2></div>
+      <div class="section-heading"><div class="sh-text"><span class="eyebrow">أربع خطوات</span><h2>كيف تحصل على الخدمة؟</h2></div></div>
       ${STEPS_HTML}
 
-      <div class="section-heading"><h2>أسئلة شائعة</h2></div>
+      <div class="section-heading"><div class="sh-text"><span class="eyebrow">لديك سؤال؟</span><h2>أسئلة شائعة</h2></div></div>
       ${faqHtml()}
     </div>
 
@@ -384,8 +403,8 @@ async function renderHome() {
   const [services, packages] = await Promise.all([loadServices(), loadPackages()]);
   const sEl = document.getElementById("homeServices");
   const pEl = document.getElementById("homePackages");
-  if (sEl) sEl.innerHTML = !services ? LOAD_ERR : services.length ? services.map(serviceTile).join("") : `<div class="empty-state">قريبًا.</div>`;
-  if (pEl) pEl.innerHTML = !packages ? LOAD_ERR : packages.length ? packages.map(packageCard).join("") : `<div class="empty-state">قريبًا.</div>`;
+  if (sEl) sEl.innerHTML = !services ? LOAD_ERR : services.length ? services.map((x, i) => serviceTile(x, i)).join("") : `<div class="empty-state">قريبًا.</div>`;
+  if (pEl) pEl.innerHTML = !packages ? LOAD_ERR : packages.length ? packages.map((x, i) => packageCard(x, i)).join("") : `<div class="empty-state">قريبًا.</div>`;
   if (sEl) wireAddToCartButtons(sEl);
   if (pEl && packages) wireStageButtons(pEl, packages);
   wireFaq();
@@ -405,14 +424,14 @@ async function renderServices() {
   setMeta("الخدمات | اتقان", "دراسات متخصصة واستشارية، تقييم الشركات والشركات العائلية، إعادة هيكلة، خطط تطوير أعمال، وخدمات مخصصة للشركات القائمة.");
   layout(`
     <div class="wrap">
-      <div class="section-heading" style="margin-top:40px;"><h2>الخدمات</h2></div>
+      <div class="section-heading"><div class="sh-text"><span class="eyebrow">ماذا نقدّم</span><h2>الخدمات</h2></div></div>
       <p class="note-muted">اختر الخدمة، واطلبها مباشرة — سيصلك عرض سعر واضح قبل أي التزام.</p>
       <div id="list" class="shop-grid"><div class="loading">جارِ التحميل…</div></div>
     </div>`);
   const services = await loadServices();
   const listEl = document.getElementById("list");
   listEl.innerHTML = !services ? LOAD_ERR : services.length
-    ? services.map(serviceTile).join("")
+    ? services.map((x, i) => serviceTile(x, i)).join("")
     : `<div class="empty-state">لا توجد خدمات منشورة حاليًا.</div>`;
   wireAddToCartButtons(listEl);
 }
@@ -437,7 +456,7 @@ async function renderService(slug) {
       <div class="product-detail">
         <div>
           <div class="breadcrumb"><a href="#/">الرئيسية</a><span class="sep">/</span><a href="#/services">الخدمات</a><span class="sep">/</span>${esc(s.title)}</div>
-          <span class="row-icon" style="display:inline-flex;width:44px;height:44px;">${ICONS[s.slug] || ""}</span>
+          <span class="detail-icon">${ICONS[s.slug] || ICONS["custom-corporate-services"]}</span>
           <h1 class="pd-title" style="margin-top:14px;">${esc(s.title)}</h1>
           <p class="service-lede">${esc(s.full_description || s.short_description)}</p>
 
@@ -509,7 +528,7 @@ async function renderPackages() {
   setMeta("ابدأ حسب وضعك | اتقان", "مشروع جديد، شركة قائمة تريد النمو، شركة تستعد لمستثمر أو تمويل، أو شركة عائلية — اختر وضعك ونقترح لك الخدمات المناسبة.");
   layout(`
     <div class="wrap">
-      <div class="section-heading" style="margin-top:40px;"><h2>ابدأ حسب وضعك</h2></div>
+      <div class="section-heading"><div class="sh-text"><span class="eyebrow">اختر مرحلتك</span><h2>ابدأ حسب وضعك</h2></div></div>
       <div class="distinguish-note">
         اختر الوضع الأقرب لشركتك، وسنقترح عليك الخدمات المناسبة لهذه المرحلة. يمكنك طلبها معًا، أو فتح أي خدمة لمعرفة تفاصيلها، ويصلك عرض سعر واحد بعد فهم احتياجك.
       </div>
@@ -518,7 +537,7 @@ async function renderPackages() {
   const [, packages] = await Promise.all([loadServices(), loadPackages()]);
   const el = document.getElementById("list");
   el.innerHTML = !packages ? LOAD_ERR : packages.length
-    ? packages.map(packageCard).join("")
+    ? packages.map((x, i) => packageCard(x, i)).join("")
     : `<div class="empty-state">لا توجد مراحل منشورة حاليًا.</div>`;
   if (packages) wireStageButtons(el, packages);
 }
@@ -528,7 +547,7 @@ function renderHowItWorks() {
   setMeta("كيف نعمل | اتقان", "أربع خطوات بسيطة من طلب الخدمة حتى استلام المخرجات.");
   layout(`
     <div class="wrap">
-      <div class="section-heading" style="margin-top:40px;"><h2>كيف تحصل على الخدمة؟</h2></div>
+      <div class="section-heading"><div class="sh-text"><span class="eyebrow">أربع خطوات</span><h2>كيف تحصل على الخدمة؟</h2></div></div>
       ${STEPS_HTML}
       <div class="cta-band" style="margin-top:12px;">
         <h2>جاهز تبدأ؟</h2>
@@ -541,12 +560,12 @@ function renderAbout() {
   setMeta("عن إتقان | اتقان لخدمات الأعمال", "اتقان لخدمات الأعمال، شركة سعودية تأسست عام 2024، تقدّم دراسات واستشارات لأصحاب المشاريع والشركات القائمة.");
   layout(`
     <div class="wrap">
-      <div class="section-heading" style="margin-top:40px;"><h2>عن إتقان</h2></div>
+      <div class="section-heading"><div class="sh-text"><span class="eyebrow">من نحن</span><h2>عن إتقان</h2></div></div>
       <p class="service-lede">اتقان لخدمات الأعمال — شركة سعودية تأسست عام ${esc(SETTINGS.founded?.year || "2024")}، تقدّم دراسات واستشارات لأصحاب المشاريع الجديدة والشركات القائمة في السوق السعودي، بهدف مساعدتهم على اتخاذ قرارات أعمال مبنية على تحليل واضح لا على تخمين. ومن خدماتنا تقييم الشركات والشركات العائلية بحياد وسرية تامة.</p>
       ${(SETTINGS.crNumber || SETTINGS.vatNumber) ? `<p class="note-muted">${SETTINGS.crNumber ? `سجل تجاري: ${esc(SETTINGS.crNumber)}` : ""}${SETTINGS.crNumber && SETTINGS.vatNumber ? " · " : ""}${SETTINGS.vatNumber ? `الرقم الضريبي: ${esc(SETTINGS.vatNumber)}` : ""}</p>` : ""}
       <div class="why-grid">
         <div class="why-card"><div class="icon-badge">${ICONS["advisory-studies"]}</div><h4>تحليل عملي</h4><p>نركز على المعلومات التي تساعدك في اتخاذ القرار.</p></div>
-        <div class="why-card"><div class="icon-badge">${ICONS["restructuring"]}</div><h4>فهم للسوق السعودي</h4><p>نراعي بيئة الأعمال والسوق في المملكة.</p></div>
+        <div class="why-card"><div class="icon-badge">${ICONS["map"]}</div><h4>فهم للسوق السعودي</h4><p>نراعي بيئة الأعمال والسوق في المملكة.</p></div>
         <div class="why-card"><div class="icon-badge">${ICONS["specialized-studies"]}</div><h4>مخرجات واضحة</h4><p>الدراسة ليست مجرد صفحات؛ بل تحليل وتوصيات.</p></div>
         <div class="why-card"><div class="icon-badge">${ICONS["custom-corporate-services"]}</div><h4>حلول حسب احتياج المشروع</h4><p>يمكن تخصيص الخدمة حسب طبيعة المشروع وهدف العميل.</p></div>
       </div>
@@ -561,7 +580,7 @@ function renderFaqPage() {
   setMeta("الأسئلة الشائعة | اتقان", "إجابات على أكثر الأسئلة شيوعًا حول خدمات اتقان وطريقة الطلب والتسليم.");
   layout(`
     <div class="wrap">
-      <div class="section-heading" style="margin-top:40px;"><h2>الأسئلة الشائعة</h2></div>
+      <div class="section-heading"><div class="sh-text"><span class="eyebrow">لديك سؤال؟</span><h2>الأسئلة الشائعة</h2></div></div>
       ${faqHtml()}
     </div>`);
   wireFaq();
@@ -706,7 +725,7 @@ function renderCart() {
   setMeta("قائمة طلبي | اتقان", "الخدمات التي اخترتها قبل إرسال طلب عرض السعر.");
   layout(`
     <div class="wrap">
-      <div class="section-heading" style="margin-top:40px;"><h2>قائمة طلبي</h2></div>
+      <div class="section-heading"><div class="sh-text"><span class="eyebrow">طلبك</span><h2>قائمة طلبي</h2></div></div>
       <p class="note-muted">اجمع الخدمات التي تحتاجها في طلب واحد، وسيصلك عرض سعر واحد يشملها. لا دفع الآن.</p>
       <div id="cartWrap"></div>
     </div>`);
