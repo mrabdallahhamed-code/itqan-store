@@ -11,6 +11,11 @@ window.ITQAN_SETTINGS = {
   contactEmail: "info@itqanbs.sa",
   mainSiteUrl: "https://www.itqanbs.sa",
   founded: { year: "2024", note: "شركة سعودية" },
+
+  // بيانات الثقة — تظهر في الفوتر وصفحة "عن إتقان" فقط إذا عُبّئت
+  crNumber: "",        // رقم السجل التجاري
+  vatNumber: "",       // الرقم الضريبي
+  businessCenterUrl: "", // رابط توثيق المركز السعودي للأعمال
   legal: {
     privacyUrl: "https://www.itqanbs.sa/privacy/",
     termsUrl: "https://www.itqanbs.sa/terms/",

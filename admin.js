@@ -504,6 +504,7 @@ async function renderContentForm(table, id) {
           <div class="field"><label>مدة التنفيذ (اختياري، اتركه فارغًا إن لم تحدَّد بعد)</label><input name="duration_note" value="${esc(x.duration_note || "")}" placeholder="مثال: تُحدَّد ضمن عرض السعر"></div>
           <div class="field"><label>طريقة التسليم (اختياري)</label><input name="delivery_note" value="${esc(x.delivery_note || "")}" placeholder="مثال: تسليم إلكتروني بعد اعتماد السداد"></div>
         </div>
+        <div class="field"><label>السعر الاسترشادي "تبدأ من" بالريال (اختياري — اتركه فارغًا لإخفائه)</label><input type="number" min="0" step="1" name="price_from" value="${esc(x.price_from ?? "")}"></div>
         <div class="field"><label>المتطلبات من العميل (اختياري)</label><textarea name="requirements_note">${esc(x.requirements_note || "")}</textarea></div>` : ""}
       <div class="field"><label>ما تشمله (كل بند في سطر)</label>
         <textarea name="items_text" rows="6">${esc((Array.isArray(x.items) ? x.items : []).join("\n"))}</textarea></div>
@@ -539,6 +540,7 @@ async function renderContentForm(table, id) {
       payload.duration_note = fd.get("duration_note") || null;
       payload.requirements_note = fd.get("requirements_note") || null;
       payload.delivery_note = fd.get("delivery_note") || null;
+      payload.price_from = fd.get("price_from") ? Number(fd.get("price_from")) : null;
     }
 
     const { error } = id

@@ -738,3 +738,9 @@ a { color: inherit; text-decoration: none; }
 }
 .trust-bar-text { font-size: 14px; color: var(--ink-soft); }
 .trust-bar-link { font-size: 13.5px; font-weight: 600; color: var(--brass); white-space: nowrap; }
+
+/* ---------- السعر الاسترشادي ---------- */
+.price-from { font-size: 13px; color: var(--slate); margin-top: 10px; }
+.price-from b { color: var(--brass); font-family: var(--font-display); font-size: 15px; }
+.buy-box .price-from { margin: -4px 0 14px; }
+.footer-bottom a { color: inherit; text-decoration: underline; }
