@@ -446,7 +446,7 @@ async function renderRequestDetail(id) {
 // ---------------- Services / Packages management ----------------
 const CONTENT = {
   services: { label: "الخدمات", single: "خدمة", audience: false, svcFields: true },
-  packages: { label: "الباقات", single: "باقة", audience: true, svcFields: false },
+  packages: { label: "المراحل (ابدأ حسب وضعك)", single: "مرحلة", audience: true, svcFields: false },
 };
 
 async function renderContentList(table) {
@@ -487,6 +487,13 @@ async function renderContentForm(table, id) {
     const { data } = await sb.from(table).select("*").eq("id", id).single();
     if (data) x = data;
   }
+  // للمراحل: قائمة الخدمات لاختيار ما يُقترح فيها
+  let allServices = [];
+  if (table === "packages") {
+    const { data } = await sb.from("services").select("slug, title, status").order("sort_order").order("created_at");
+    allServices = data || [];
+  }
+  const chosen = Array.isArray(x.service_slugs) ? x.service_slugs : [];
 
   shell(`
     <div class="admin-header-row"><h1>${id ? "تعديل" : "إضافة"} ${meta.single}</h1></div>
@@ -497,7 +504,16 @@ async function renderContentForm(table, id) {
         <input required name="slug" value="${esc(x.slug)}" placeholder="business-plans" pattern="[a-z0-9]+(-[a-z0-9]+)*"></div>
       <div class="field"><label>وصف مختصر</label><textarea name="short_description">${esc(x.short_description)}</textarea></div>
       <div class="field"><label>الوصف الكامل</label><textarea name="full_description" rows="5">${esc(x.full_description)}</textarea></div>
-      ${meta.audience ? `<div class="field"><label>لمن تناسب</label><input name="audience" value="${esc(x.audience)}"></div>` : ""}
+      ${meta.audience ? `<div class="field"><label>إذا كان العميل… (وصف الوضع)</label><input name="audience" value="${esc(x.audience)}"></div>` : ""}
+      ${table === "packages" ? `
+        <div class="field"><label>الخدمات المقترحة في هذه المرحلة</label>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            ${allServices.map((sv) => `<label style="font-weight:400;display:flex;gap:8px;align-items:center;">
+              <input type="checkbox" name="service_slugs" value="${esc(sv.slug)}" ${chosen.includes(sv.slug) ? "checked" : ""} style="width:auto;">
+              ${esc(sv.title)}${sv.status !== "published" ? " (مسودة)" : ""}</label>`).join("") || "<small>لا توجد خدمات بعد.</small>"}
+          </div>
+          <small>تظهر للعميل كروابط لصفحات الخدمات، ويمكنه طلبها معًا بضغطة.</small>
+        </div>` : ""}
       ${meta.svcFields ? `
         <div class="field"><label>لمن تناسب هذه الخدمة (اختياري)</label><input name="target_customer" value="${esc(x.target_customer || "")}" placeholder="مثال: أصحاب المشاريع الجديدة والشركات القائمة"></div>
         <div class="form-row-2">
@@ -535,6 +551,7 @@ async function renderContentForm(table, id) {
       status: fd.get("status"),
     };
     if (meta.audience) payload.audience = fd.get("audience") || null;
+    if (table === "packages") payload.service_slugs = fd.getAll("service_slugs");
     if (meta.svcFields) {
       payload.target_customer = fd.get("target_customer") || null;
       payload.duration_note = fd.get("duration_note") || null;

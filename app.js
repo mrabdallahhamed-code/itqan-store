@@ -85,6 +85,7 @@ const ICONS = {
   "foundation": `<svg viewBox="0 0 24 24"><path d="M4 21h16M6 21V10M18 21V10M4 10l8-6 8 6" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 21v-6h4v6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
   "development": `<svg viewBox="0 0 24 24"><path d="M4 17 10 11 14 15 20 9" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 9h5v5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
   "business-valuation": `<svg viewBox="0 0 24 24"><path d="M12 3v18M5 7h14" stroke-linecap="round"/><path d="M5 7l-3 6a3 3 0 0 0 6 0L5 7ZM19 7l-3 6a3 3 0 0 0 6 0l-3-6Z" stroke-linejoin="round"/><path d="M8 21h8" stroke-linecap="round"/></svg>`,
+  "family-business": `<svg viewBox="0 0 24 24"><circle cx="8" cy="7" r="2.5"/><circle cx="16" cy="7" r="2.5"/><circle cx="12" cy="13" r="2"/><path d="M3.5 20c0-3 2-5 4.5-5M20.5 20c0-3-2-5-4.5-5M8.5 20c0-2 1.6-3.5 3.5-3.5s3.5 1.5 3.5 3.5" stroke-linecap="round"/></svg>`,
   "readiness": `<svg viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6l-8-3Z" stroke-linejoin="round"/><path d="m8.5 12 2.5 2.5L16 9" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
 };
 const icon = (slug) => (ICONS[slug] ? `<div class="icon-badge">${ICONS[slug]}</div>` : "");
@@ -163,9 +164,9 @@ function layout(content) {
         <nav class="nav-links" id="navLinks">
           <a href="#/">الرئيسية</a>
           <a href="#/services">الخدمات</a>
+          <a href="#/packages">ابدأ حسب وضعك</a>
           <a href="#/how-it-works">كيف نعمل</a>
           <a href="#/about">عن إتقان</a>
-          <a href="#/faq">الأسئلة الشائعة</a>
           <a href="#/contact">تواصل معنا</a>
           <a href="#/request" class="btn btn-primary">اطلب عرض سعر</a>
           <a href="#/cart" class="cart-link" aria-label="قائمة طلبي" title="قائمة طلبي">
@@ -194,7 +195,7 @@ function layout(content) {
           <div class="footer-col">
             <h5>روابط</h5>
             <a href="#/how-it-works">كيف نعمل</a>
-            <a href="#/packages">الباقات</a>
+            <a href="#/packages">ابدأ حسب وضعك</a>
             <a href="#/about">عن إتقان</a>
             <a href="#/faq">الأسئلة الشائعة</a>
             <a href="#/track">تتبع طلبك</a>
@@ -256,15 +257,42 @@ function wireAddToCartButtons(container) {
   });
 }
 
-const packageCard = (k) => `
+// "ابدأ حسب وضعك": كل مرحلة تشير إلى خدمات فعلية (service_slugs) بدل منتج موازٍ
+const stageServices = (k) => {
+  const all = SERVICES_CACHE || [];
+  const slugs = Array.isArray(k.service_slugs) ? k.service_slugs : [];
+  return slugs.map((sl) => all.find((x) => x.slug === sl)).filter(Boolean);
+};
+const packageCard = (k) => {
+  const svcs = stageServices(k);
+  return `
   <div class="pkg-card">
     ${icon(k.slug)}
     <h3>${esc(k.title)}</h3>
     <p class="pkg-sub">${esc(k.short_description)}</p>
-    ${k.audience ? `<div class="pkg-aud"><b>تناسب:</b> ${esc(k.audience)}</div>` : ""}
-    <ul class="contents-list">${listItems(k).map((i) => `<li>${esc(i)}</li>`).join("")}</ul>
-    <a class="btn btn-primary" href="#/request?package=${esc(k.slug)}">اطلب عرض سعر</a>
+    ${k.audience ? `<div class="pkg-aud"><b>إذا كنت:</b> ${esc(k.audience)}</div>` : ""}
+    ${svcs.length ? `
+      <div class="stage-label">الخدمات المقترحة لك</div>
+      <div class="stage-svcs">${svcs.map((x) => `<a href="#/service/${esc(x.slug)}" class="stage-svc"><span class="tick">✓</span>${esc(x.title)}</a>`).join("")}</div>`
+    : `<ul class="contents-list">${listItems(k).map((i) => `<li>${esc(i)}</li>`).join("")}</ul>`}
+    ${svcs.length
+      ? `<button class="btn btn-primary stage-btn" data-stage="${esc(k.slug)}">اطلب هذه الخدمات معًا</button>
+         <small class="stage-hint">تُضاف لقائمة طلبك ويمكنك حذف أو إضافة ما تشاء قبل الإرسال.</small>`
+      : `<a class="btn btn-primary" href="#/request?package=${esc(k.slug)}">اطلب عرض سعر</a>`}
   </div>`;
+};
+
+function wireStageButtons(container, packages) {
+  container.querySelectorAll(".stage-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const k = packages.find((p) => p.slug === btn.dataset.stage);
+      if (!k) return;
+      stageServices(k).forEach((x) => addToCart({ id: x.id, slug: x.slug, title: x.title }));
+      try { sessionStorage.setItem("itqan_stage", k.title); } catch (_) {}
+      location.hash = "#/cart";
+    });
+  });
+}
 
 // ---------------- Router ----------------
 window.addEventListener("hashchange", route);
@@ -313,8 +341,8 @@ async function renderHome() {
       <div class="section-heading" style="margin-top:36px;"><h2>خدماتنا</h2><a href="#/services" class="count">عرض الكل ←</a></div>
       <div id="homeServices" class="shop-grid"><div class="loading">جارِ التحميل…</div></div>
 
-      <div class="section-heading"><h2>تفضّل باقة جاهزة بدل التجميع بنفسك؟</h2><a href="#/packages" class="count">كل الباقات ←</a></div>
-      <p class="note-muted">باقات مُجهّزة مسبقًا لمرحلتك (تأسيس، نمو، أو جاهزية) — أو كوّن طلبك بنفسك بإضافة الخدمات التي تحتاجها.</p>
+      <div class="section-heading"><h2>لا تعرف من أين تبدأ؟ ابدأ حسب وضعك</h2><a href="#/packages" class="count">التفاصيل ←</a></div>
+      <p class="note-muted">اختر الوضع الأقرب لك، وسنقترح عليك الخدمات المناسبة لمرحلتك.</p>
       <div id="homePackages" class="pkg-grid"><div class="loading">جارِ التحميل…</div></div>
 
       <div class="section-heading"><h2>مثال: ماذا تتضمن دراسة الجدوى؟</h2></div>
@@ -354,6 +382,7 @@ async function renderHome() {
   if (sEl) sEl.innerHTML = !services ? LOAD_ERR : services.length ? services.map(serviceTile).join("") : `<div class="empty-state">قريبًا.</div>`;
   if (pEl) pEl.innerHTML = !packages ? LOAD_ERR : packages.length ? packages.map(packageCard).join("") : `<div class="empty-state">قريبًا.</div>`;
   if (sEl) wireAddToCartButtons(sEl);
+  if (pEl && packages) wireStageButtons(pEl, packages);
   wireFaq();
 }
 
@@ -472,19 +501,21 @@ async function renderService(slug) {
 
 // ---------------- Packages ----------------
 async function renderPackages() {
-  setMeta("الباقات | اتقان", "باقة التأسيس، باقة النمو والتوسع، وباقة الجاهزية للاستثمار والتمويل من اتقان لخدمات الأعمال.");
+  setMeta("ابدأ حسب وضعك | اتقان", "مشروع جديد، شركة قائمة تريد النمو، شركة تستعد لمستثمر أو تمويل، أو شركة عائلية — اختر وضعك ونقترح لك الخدمات المناسبة.");
   layout(`
     <div class="wrap">
-      <div class="section-heading" style="margin-top:40px;"><h2>الباقات</h2></div>
+      <div class="section-heading" style="margin-top:40px;"><h2>ابدأ حسب وضعك</h2></div>
       <div class="distinguish-note">
-        <b>الفرق بين الخدمات والباقات:</b> الخدمات توضح ماذا نقدّم بالتفصيل، أما الباقات فتجمع مجموعة خدمات متكاملة تناسب المرحلة التي تمر بها شركتك. لا توجد أسعار ثابتة؛ يُحدَّد العرض بعد فهم احتياجك ونطاق العمل.
+        اختر الوضع الأقرب لشركتك، وسنقترح عليك الخدمات المناسبة لهذه المرحلة. يمكنك طلبها معًا، أو فتح أي خدمة لمعرفة تفاصيلها، ويصلك عرض سعر واحد بعد فهم احتياجك.
       </div>
       <div id="list" class="pkg-grid"><div class="loading">جارِ التحميل…</div></div>
     </div>`);
-  const packages = await loadPackages();
-  document.getElementById("list").innerHTML = !packages ? LOAD_ERR : packages.length
+  const [, packages] = await Promise.all([loadServices(), loadPackages()]);
+  const el = document.getElementById("list");
+  el.innerHTML = !packages ? LOAD_ERR : packages.length
     ? packages.map(packageCard).join("")
-    : `<div class="empty-state">لا توجد باقات منشورة حاليًا.</div>`;
+    : `<div class="empty-state">لا توجد مراحل منشورة حاليًا.</div>`;
+  if (packages) wireStageButtons(el, packages);
 }
 
 // ---------------- صفحات ثابتة (كيف نعمل / عن إتقان / الأسئلة الشائعة / تواصل معنا) ----------------
@@ -583,19 +614,14 @@ async function renderRequestForm(params) {
         </div>
 
         ${cartMode ? "" : `
-        <div class="form-row-2">
+        <div class="form-row-2" style="grid-template-columns:1fr;">
           <div class="field"><label>الخدمة المطلوبة (اختياري)</label>
             <select name="service_id">
               <option value="">— لم أحدد —</option>
               ${services.map((s) => opt(s.id, s.title, s.slug === preService)).join("")}
             </select>
           </div>
-          <div class="field"><label>الباقة (اختياري)</label>
-            <select name="package_id">
-              <option value="">— لم أحدد —</option>
-              ${packages.map((k) => opt(k.id, k.title, k.slug === prePackage)).join("")}
-            </select>
-          </div>
+          ${prePackage ? `<input type="hidden" name="package_id" value="${esc((packages.find((k) => k.slug === prePackage) || {}).id || "")}">` : ""}
         </div>`}
 
         <div class="form-row-2">
@@ -645,7 +671,11 @@ async function renderRequestForm(params) {
       p_business_size: fd.get("business_size") || null,
       p_goal: fd.get("goal"),
       p_budget_range: fd.get("budget_range") || null,
-      p_message: fd.get("message") || null,
+      p_message: (() => {
+        let st = null; try { st = sessionStorage.getItem("itqan_stage"); } catch (_) {}
+        const m = fd.get("message") || "";
+        return (cartMode && st ? `[المسار المختار: ${st}]\n` : "") + m || null;
+      })(),
       p_source: sessionStorage.getItem("itqan_src") || "store",
     };
 
@@ -661,7 +691,7 @@ async function renderRequestForm(params) {
 
     const row = data[0];
     sessionStorage.setItem("itqan_last_email", fd.get("email"));
-    if (cartMode) { CART = []; saveCart(); }
+    if (cartMode) { CART = []; saveCart(); try { sessionStorage.removeItem("itqan_stage"); } catch (_) {} }
     sb.functions.invoke("send-order-email", { body: { request_id: row.out_request_id, event: "request_received" } }).catch(() => {});
     location.hash = `#/done/${encodeURIComponent(row.out_request_number)}`;
   });

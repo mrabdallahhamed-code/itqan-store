@@ -744,3 +744,13 @@ a { color: inherit; text-decoration: none; }
 .price-from b { color: var(--brass); font-family: var(--font-display); font-size: 15px; }
 .buy-box .price-from { margin: -4px 0 14px; }
 .footer-bottom a { color: inherit; text-decoration: underline; }
+
+/* ---------- ابدأ حسب وضعك ---------- */
+.stage-label { font-size: 12.5px; color: var(--slate); margin: 14px 0 8px; font-weight: 600; }
+.stage-svcs { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.stage-svc { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; color: var(--ink); text-decoration: none; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--parchment); transition: border-color .15s; }
+.stage-svc:hover { border-color: var(--brass-soft); }
+.stage-svc .tick { color: var(--brass); }
+.stage-hint { display: block; font-size: 12px; color: var(--slate); margin-top: 8px; }
+
+.nav-links a { white-space: nowrap; }
