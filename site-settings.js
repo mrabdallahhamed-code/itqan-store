@@ -28,7 +28,7 @@ window.ITQAN_SETTINGS = {
     { name: "فيسبوك", url: "https://www.facebook.com/share/1HTgwCNa7R/?mibextid=wwXIfr" },
   ],
   ecosystem: [
-    { name: "صمام",  description: "تابع طلباتك وملفاتك وتنبيهات أعمالك في مكان واحد.", url: "https://simam.itqanbs.sa" },
-    { name: "مبتدأ", description: "خدمات الاستثمار الأجنبي وتأسيس الشركات لغير السعوديين.", url: "https://start.itqanbs.sa" },
+    { name: "صمام من إتقان", description: "تابع طلباتك وملفاتك وتنبيهات أعمالك في مكان واحد.", url: "https://simam.itqanbs.sa" },
+    { name: "مبتدأ من إتقان", description: "خدمات الاستثمار الأجنبي وتأسيس الشركات لغير السعوديين.", url: "https://start.itqanbs.sa" },
   ],
 };
