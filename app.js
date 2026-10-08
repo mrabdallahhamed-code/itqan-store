@@ -33,10 +33,66 @@ function removeFromCart(id) {
   saveCart();
 }
 function updateCartBadge() {
+  const t = document.getElementById("tabCartCount");
+  if (t) { t.textContent = CART.length || ""; t.style.display = CART.length ? "inline-flex" : "none"; }
   const el = document.getElementById("cartCount");
   if (!el) return;
   if (CART.length) { el.textContent = CART.length; el.style.display = "inline-flex"; }
   else { el.style.display = "none"; }
+}
+
+// ---------------- تطبيق الجوال (PWA) ----------------
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
+let deferredInstall = null;
+window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); deferredInstall = e; wireInstall(); });
+const isStandalone = () => window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent);
+const isMobile = () => window.matchMedia("(max-width: 780px)").matches;
+
+function wireInstall() {
+  const banner = document.getElementById("installBanner");
+  if (!banner) return;
+  let dismissed = false;
+  try { dismissed = localStorage.getItem("itqan_install_dismissed") === "1"; } catch (_) {}
+  if (isStandalone() || dismissed || !isMobile() || (!deferredInstall && !isIOS())) { banner.hidden = true; return; }
+  const btn = document.getElementById("installBtn");
+  if (isIOS() && !deferredInstall) {
+    document.getElementById("installHint").innerHTML = `اضغط زر المشاركة <svg class="ios-share" viewBox="0 0 24 24"><path d="M12 3v12M8 7l4-4 4 4M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7" stroke-linecap="round" stroke-linejoin="round"/></svg> ثم «إضافة إلى الشاشة الرئيسية»`;
+    btn.style.display = "none";
+  }
+  // يظهر مرة واحدة في الجلسة، بعد أن يتصفح العميل قليلًا، حتى لا يزعجه
+  let shown = false;
+  try { shown = sessionStorage.getItem("itqan_install_shown") === "1"; } catch (_) {}
+  if (shown) {
+    let open = false; try { open = sessionStorage.getItem("itqan_install_open") === "1"; } catch (_) {}
+    banner.hidden = !open;
+  } else {
+    clearTimeout(window.__installTimer);
+    window.__installTimer = setTimeout(() => {
+      const b = document.getElementById("installBanner");
+      if (!b) return;
+      b.hidden = false;
+      try { sessionStorage.setItem("itqan_install_shown", "1"); sessionStorage.setItem("itqan_install_open", "1"); } catch (_) {}
+    }, 8000);
+  }
+  btn.onclick = async () => {
+    if (!deferredInstall) return;
+    deferredInstall.prompt();
+    await deferredInstall.userChoice.catch(() => {});
+    deferredInstall = null; banner.hidden = true;
+  };
+  document.getElementById("installClose").onclick = () => {
+    banner.hidden = true;
+    try { localStorage.setItem("itqan_install_dismissed", "1"); sessionStorage.setItem("itqan_install_open", "0"); } catch (_) {}
+  };
+}
+
+function markActiveTab() {
+  const page = (location.hash.replace(/^#\/?/, "").split(/[/?]/)[0]) || "home";
+  const map = { home: "home", services: "services", service: "services", packages: "services", request: "request", cart: "cart", track: "track", done: "track" };
+  document.querySelectorAll(".tabbar a").forEach((a) => a.classList.toggle("active", a.dataset.tab === map[page]));
 }
 
 // ---------------- Helpers ----------------
@@ -233,7 +289,22 @@ function layout(content) {
     <a class="wa-float" href="https://wa.me/${esc(CFG.whatsappSupportNumber)}" target="_blank" rel="noopener" aria-label="تواصل معنا عبر واتساب" title="تواصل معنا عبر واتساب">
       <svg width="26" height="26" viewBox="0 0 32 32" fill="white"><path d="M16 3C9.4 3 4 8.4 4 15c0 2.4.7 4.6 1.9 6.5L4 29l7.7-1.9c1.8 1 3.9 1.5 6.3 1.5 6.6 0 12-5.4 12-12S22.6 3 16 3zm0 21.8c-2 0-3.9-.6-5.5-1.6l-.4-.2-4.6 1.2 1.2-4.5-.3-.4C5.4 17.7 4.8 16.4 4.8 15c0-6.2 5-11.2 11.2-11.2S27.2 8.8 27.2 15 22.2 24.8 16 24.8zm6.1-8.4c-.3-.2-2-1-2.3-1.1-.3-.1-.5-.2-.8.2-.2.3-.9 1.1-1.1 1.3-.2.2-.4.2-.7.1-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-2-1.8-2.3-.2-.3 0-.5.1-.6.1-.1.3-.4.5-.5.2-.2.2-.3.3-.5.1-.2 0-.4 0-.6-.1-.2-.8-1.9-1.1-2.6-.3-.7-.6-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.3-1.2 1.1-1.2 2.8s1.2 3.3 1.4 3.5c.2.2 2.4 3.7 5.8 5.1.8.3 1.4.6 1.9.7.8.3 1.5.2 2.1.1.6-.1 2-.8 2.3-1.6.3-.8.3-1.4.2-1.6-.1-.1-.3-.2-.6-.4z"/></svg>
     </a>
+    <nav class="tabbar" aria-label="التنقل السريع">
+      <a href="#/" data-tab="home"><svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z" stroke-linejoin="round"/></svg><span>الرئيسية</span></a>
+      <a href="#/services" data-tab="services"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg><span>الخدمات</span></a>
+      <a href="#/request" data-tab="request" class="tab-main"><span class="tab-main-ic"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg></span><span>عرض سعر</span></a>
+      <a href="#/cart" data-tab="cart"><span class="tab-ic-wrap"><svg viewBox="0 0 24 24"><path d="M4 6h2l2 11h10l2-8H7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/></svg><b class="tab-badge" id="tabCartCount"></b></span><span>طلبي</span></a>
+      <a href="#/track" data-tab="track"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4" stroke-linecap="round"/></svg><span>تتبع</span></a>
+    </nav>
+    <div class="install-banner" id="installBanner" hidden>
+      <img src="icon-192.png" alt="">
+      <div class="ib-text"><b>ثبّت متجر إتقان على جوالك</b><small id="installHint">للوصول السريع وتتبع طلبك بضغطة واحدة</small></div>
+      <button class="btn btn-primary" id="installBtn">تثبيت</button>
+      <button class="ib-close" id="installClose" aria-label="إغلاق">×</button>
+    </div>
   `;
+  wireInstall();
+  markActiveTab();
   document.getElementById("mobileMenuBtn")?.addEventListener("click", () => {
     document.getElementById("navLinks")?.classList.toggle("open");
   });

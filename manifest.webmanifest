@@ -1,0 +1,23 @@
+{
+  "name": "متجر إتقان — استشارات ودراسات الأعمال",
+  "short_name": "متجر إتقان",
+  "description": "اطلب دراسات الجدوى والاستشارات وتقييم الشركات من إتقان لخدمات الأعمال، وتابع طلبك من جوالك.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "/?src=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F7F4EC",
+  "theme_color": "#16233A",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "الخدمات", "url": "/#/services" },
+    { "name": "تتبع طلبك", "url": "/#/track" },
+    { "name": "اطلب عرض سعر", "url": "/#/request" }
+  ]
+}

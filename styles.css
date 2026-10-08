@@ -983,3 +983,139 @@ a.stage-svc:hover { border-color: var(--brass); color: var(--brass); }
   main > * { animation: fadeUp .45s ease both; }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 }
+
+/* ============================================================
+   تجربة الجوال + التطبيق المثبّت
+   ============================================================ */
+.tabbar, .install-banner { display: none; }
+html { -webkit-tap-highlight-color: transparent; }
+
+@media (max-width: 780px) {
+  body { padding-bottom: calc(74px + env(safe-area-inset-bottom)); font-size: 15px; }
+  .wrap { padding: 0 18px; }
+
+  /* الرأس: أخف، والقائمة الجانبية لروابط المعلومات فقط */
+  .site-header { padding-top: env(safe-area-inset-top); }
+  .site-header .wrap { padding-top: 10px; padding-bottom: 10px; }
+  .brand img { height: 32px; }
+  .brand .brand-text { font-size: 16px; }
+  .nav-links .btn, .nav-links .cart-link { display: none; }
+  .nav-links { top: calc(58px + env(safe-area-inset-top)); }
+  .nav-links a:not(.btn):not(.cart-link) { padding: 15px 6px; font-size: 16px; }
+  .mobile-menu-btn { width: 42px; height: 42px; border-radius: 10px; border: 1px solid rgba(201,166,107,.35); display: flex; align-items: center; justify-content: center; }
+
+  /* شريط التنقل السفلي */
+  .tabbar {
+    display: grid; grid-template-columns: repeat(5, 1fr); align-items: end;
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 40;
+    background: rgba(255,255,255,.96); backdrop-filter: blur(12px);
+    border-top: 1px solid var(--line); box-shadow: 0 -6px 24px rgba(22,35,58,.08);
+    padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+  }
+  .tabbar a { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0 4px; color: var(--slate); font-family: var(--font-display); font-size: 11px; font-weight: 600; min-height: 52px; justify-content: flex-end; }
+  .tabbar svg { width: 23px; height: 23px; stroke: currentColor; fill: none; stroke-width: 1.7; }
+  .tabbar a.active { color: var(--ink); }
+  .tabbar a.active svg { stroke: var(--brass); }
+  .tab-main-ic { width: 52px; height: 52px; margin-top: -26px; border-radius: 16px; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(145deg, #B48A47, var(--brass)); box-shadow: 0 8px 20px rgba(169,129,63,.4); border: 3px solid var(--white); }
+  .tab-main-ic svg { stroke: var(--white) !important; width: 24px; height: 24px; stroke-width: 2.2; }
+  .tabbar a.tab-main { color: var(--brass); }
+  .tab-ic-wrap { position: relative; display: inline-flex; }
+  .tab-badge { position: absolute; top: -4px; left: -8px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 999px; background: var(--brass); color: var(--white); font-size: 10px; display: none; align-items: center; justify-content: center; border: 2px solid var(--white); }
+
+  /* زر واتساب فوق الشريط */
+  .wa-float { width: 48px; height: 48px; bottom: calc(86px + env(safe-area-inset-bottom)); left: 16px; }
+  .wa-float svg { width: 22px; height: 22px; }
+
+  /* شريط التثبيت */
+  .install-banner:not([hidden]) {
+    display: flex; align-items: center; gap: 12px;
+    position: fixed; z-index: 45; left: 12px; right: 12px; bottom: calc(82px + env(safe-area-inset-bottom));
+    background: var(--ink); color: var(--parchment); border-radius: 18px; padding: 12px 14px;
+    box-shadow: 0 16px 40px rgba(0,0,0,.3); border: 1px solid rgba(201,166,107,.35);
+    animation: fadeUp .35s ease both;
+  }
+  .install-banner img { width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0; }
+  .ib-text { flex: 1; min-width: 0; }
+  .ib-text b { display: block; font-family: var(--font-display); font-size: 14px; }
+  .ib-text small { display: block; font-size: 12px; color: #A9B4C6; line-height: 1.6; }
+  .ios-share { width: 15px; height: 15px; stroke: var(--brass-soft); fill: none; stroke-width: 2; vertical-align: -2px; }
+  .install-banner .btn { width: auto; padding: 9px 16px; font-size: 13px; flex-shrink: 0; }
+  .ib-close { background: none; border: none; color: #A9B4C6; font-size: 22px; line-height: 1; padding: 4px; cursor: pointer; }
+
+  /* الواجهة الرئيسية أقصر على الجوال */
+  .hero { padding: 40px 0 44px; }
+  .hero h1 { font-size: 29px; margin: 10px 0 12px; }
+  .hero p { font-size: 15px; line-height: 1.9; }
+  .hero-actions { margin-top: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .hero-actions .btn { width: 100%; padding: 14px 10px; }
+  .hero-card { padding: 4px 16px; border-radius: 16px; }
+  .hero-card-row { padding: 12px 0; }
+  .hero-card-row small { display: none; }
+  .hc-ic { width: 36px; height: 36px; border-radius: 10px; }
+  .hc-ic svg { width: 18px; height: 18px; }
+
+  .section-heading { margin: 48px 0 18px; }
+  .section-heading h2 { font-size: 22px; }
+  .section-heading .count { padding: 7px 12px; font-size: 12.5px; }
+  .note-muted { margin: -8px 0 20px; }
+
+  /* بطاقات الخدمات: أفقية ومضغوطة لتصفح أسرع */
+  .shop-tile { display: grid; grid-template-columns: auto 1fr; }
+  .shop-tile-link { display: contents; }
+  .shop-tile-top { padding: 18px 16px 0 0; grid-row: 1 / span 2; }
+  .shop-tile-top .row-icon { width: 48px; height: 48px; border-radius: 14px; }
+  .shop-tile-top .row-icon svg { width: 23px; height: 23px; }
+  .tile-num { display: none; }
+  .shop-tile-body { padding: 16px 14px 4px 16px; }
+  .shop-tile-body .service-row-title { font-size: 16px; margin-bottom: 4px; }
+  .shop-tile-body .service-row-desc { font-size: 13.5px; -webkit-line-clamp: 2; }
+  .shop-tile-actions { grid-column: 1 / -1; margin: 10px 16px 16px; padding-top: 12px; }
+  .add-cart-btn { padding: 9px 16px; font-size: 13px; }
+  .shop-tile-cta { padding: 9px 0; }
+
+  /* المراحل: تمرير أفقي بالسحب */
+  .pkg-grid { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 14px; margin: 0 -18px 20px; padding: 16px 18px 12px; scrollbar-width: none; }
+  .pkg-grid::-webkit-scrollbar { display: none; }
+  .pkg-card { flex: 0 0 86%; scroll-snap-align: center; padding: 24px 20px; }
+  .pkg-card.featured { transform: none; }
+  .pkg-grid > .loading, .pkg-grid > .empty-state { flex: 1 0 100%; }
+
+  .get-panel { padding: 20px; }
+  .steps { gap: 12px; }
+  .step { padding: 20px; display: grid; grid-template-columns: auto 1fr; gap: 0 14px; }
+  .step .num { grid-row: 1 / span 2; margin: 0; width: 40px; height: 40px; font-size: 17px; }
+  .faq-q { padding: 16px; font-size: 15px; text-align: right; }
+  .faq-a p { padding: 0 16px 16px; }
+  .cta-band { padding: 48px 20px; margin-top: 56px; }
+
+  /* صفحة الخدمة: زر الطلب ثابت أسفل الشاشة */
+  .product-detail { padding: 24px 0 40px; gap: 24px; }
+  .pd-title { font-size: 25px; }
+  .service-lede { font-size: 15.5px; margin-bottom: 24px; }
+  .detail-icon { width: 54px; height: 54px; border-radius: 15px; }
+  .buy-box { position: static; padding: 22px 18px; }
+  .deliverables { grid-template-columns: 1fr; }
+  .svc-meta { grid-template-columns: 1fr 1fr; }
+
+  /* النماذج: خط 16px لمنع التكبير التلقائي في آيفون، وأهداف لمس أكبر */
+  .form-page { padding: 28px 0 40px; }
+  .form-page h2 { font-size: 24px; }
+  .field input, .field textarea, .field select { font-size: 16px; padding: 13px 14px; min-height: 48px; }
+  #requestForm .btn, #trackForm .btn, #proofForm .btn { padding: 15px; font-size: 15.5px; }
+  .summary-row { gap: 12px; }
+  .summary-row span:last-child { text-align: left; }
+  .bank-row { flex-direction: column; gap: 2px; }
+  .bank-row b { direction: ltr; text-align: right; user-select: all; }
+  .timeline .tl-step { font-size: 11px; }
+
+  .site-footer { padding: 44px 0 20px; }
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 28px 18px; }
+  .footer-grid > div:first-child { grid-column: 1 / -1; }
+}
+
+/* عند فتحه كتطبيق مثبّت */
+@media (display-mode: standalone) {
+  .install-banner { display: none !important; }
+  body { overscroll-behavior-y: none; }
+}
