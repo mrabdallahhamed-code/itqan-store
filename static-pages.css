@@ -1,0 +1,49 @@
+/* صفحات الخدمات الثابتة (للفهرسة) */
+.static-page .site-header .wrap { flex-wrap: wrap; gap: 10px; }
+.sp-nav { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+.sp-nav a { color: var(--parchment); padding: 8px 12px; border-radius: 8px; font-size: 14px; opacity: .9; white-space: nowrap; }
+.sp-nav a:hover { background: rgba(255,255,255,.06); opacity: 1; }
+.sp-nav .btn { width: auto; padding: 9px 16px; opacity: 1; }
+.sp-main { padding: 32px 24px 64px; max-width: 860px; }
+.sp-lead { font-family: var(--font-display); font-size: 17px; color: var(--brass); font-weight: 600; line-height: 1.9; margin: 0 0 10px; }
+.sp-h2 { font-family: var(--font-display); font-size: 20px; margin: 36px 0 14px; display: flex; align-items: center; gap: 10px; }
+.sp-h2::before { content: ""; width: 4px; height: 20px; border-radius: 4px; background: var(--brass); }
+.sp-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.sp-list li { background: var(--white); border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px; line-height: 1.8; position: relative; padding-inline-start: 42px; }
+.sp-list li::before { content: "✓"; position: absolute; right: 14px; top: 12px; width: 20px; height: 20px; border-radius: 50%; background: #FBF6EC; color: var(--brass); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.sp-list a { color: var(--ink); font-weight: 600; text-decoration: underline; text-decoration-color: var(--brass-soft); text-underline-offset: 4px; }
+.sp-steps { margin: 0; padding-inline-start: 22px; line-height: 2.1; }
+.sp-cta { margin: 36px 0; background: linear-gradient(160deg, var(--ink-2), var(--ink)); color: var(--parchment); border-radius: 20px; padding: 26px; display: flex; align-items: center; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
+.sp-cta b { display: block; font-family: var(--font-display); font-size: 17px; }
+.sp-cta span { display: block; color: #A9B4C6; font-size: 14px; margin-top: 4px; }
+.sp-cta .btn { width: auto; }
+.sp-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin: 24px 0; }
+.sp-card { display: block; background: var(--white); border: 1px solid var(--line); border-radius: 16px; padding: 22px; box-shadow: var(--shadow-card); transition: transform .15s, border-color .15s; }
+.sp-card:hover { transform: translateY(-3px); border-color: var(--brass-soft); }
+.sp-card h2 { font-family: var(--font-display); font-size: 18px; margin: 0 0 8px; line-height: 1.5; }
+.sp-card p { color: var(--slate); font-size: 14px; margin: 0 0 12px; line-height: 1.8; }
+.sp-card span { color: var(--brass); font-weight: 600; font-size: 13.5px; }
+.sp-more a, .service-lede a, .sp-stage p a { color: var(--brass); font-weight: 600; }
+.sp-stage { background: var(--white); border: 1px solid var(--line); border-radius: 20px; padding: 26px; margin: 18px 0; scroll-margin-top: 90px; }
+.sp-stage h2 { font-family: var(--font-display); font-size: 21px; margin: 12px 0 6px; }
+.sp-stage > p { color: var(--slate); margin: 0 0 16px; }
+.sp-stage .btn { margin-top: 16px; }
+.sp-faq { background: var(--white); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; margin: 12px 0; }
+.sp-faq h2 { font-family: var(--font-display); font-size: 16.5px; margin: 0 0 8px; }
+.sp-faq p { margin: 0; color: var(--slate); line-height: 1.9; }
+.sp-foot { display: grid; gap: 14px; margin-bottom: 20px; line-height: 2; }
+.sp-foot a { color: var(--slate); }
+.sp-foot a:hover { color: var(--brass); }
+.sp-foot b { font-family: var(--font-display); color: var(--ink); }
+.sp-foot p { margin: 4px 0 0; }
+@media (max-width: 780px) {
+  .static-page { padding-bottom: 0; }
+  .sp-nav { width: 100%; overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }
+  .sp-main { padding: 22px 18px 48px; }
+  .sp-cta .btn { width: 100%; }
+}
+/* المحتوى الاحتياطي في الصفحة الرئيسية — يُستبدل فور تحميل التطبيق */
+.seo-fallback { padding: 40px 24px; line-height: 1.9; }
+.seo-fallback h1 { font-family: var(--font-display); font-size: 26px; }
+.seo-fallback a { color: var(--brass); }
+.js .seo-fallback { display: none; }

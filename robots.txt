@@ -1,4 +1,32 @@
 User-agent: *
 Allow: /
 Disallow: /admin.html
+
+# أدوات الذكاء الاصطناعي ومحركات الإجابة — مسموح لها بقراءة الموقع
+User-agent: GPTBot
+Allow: /
+Disallow: /admin.html
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin.html
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
 Sitemap: https://store.itqanbs.sa/sitemap.xml

@@ -1,6 +1,6 @@
 // Service Worker — يجعل المتجر قابلًا للتثبيت ويسرّع فتحه
 // عند أي تحديث للموقع غيّر رقم الإصدار هنا ليحصل الزوار على النسخة الجديدة
-const VERSION = "itqan-v1";
+const VERSION = "itqan-v2";
 const SHELL = ["/", "/index.html", "/styles.css", "/app.js", "/config.js", "/site-settings.js", "/logo.png", "/icon-192.png"];
 
 self.addEventListener("install", (e) => {

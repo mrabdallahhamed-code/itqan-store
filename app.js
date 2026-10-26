@@ -264,6 +264,7 @@ function layout(content) {
             <a href="#/about">عن إتقان</a>
             <a href="#/faq">الأسئلة الشائعة</a>
             <a href="#/track">تتبع طلبك</a>
+            <a href="/services/">دليل الخدمات</a>
           </div>
           <div class="footer-col">
             <h5>منظومة اتقان</h5>
@@ -280,7 +281,7 @@ function layout(content) {
         </div>
         <div class="footer-bottom">
           © ${new Date().getFullYear()} اتقان لخدمات الأعمال. جميع الحقوق محفوظة.
-          ${SETTINGS.crNumber ? ` · سجل تجاري: ${esc(SETTINGS.crNumber)}` : ""}
+          ${SETTINGS.crNumber ? ` · الرقم الوطني الموحد: ${esc(SETTINGS.crNumber)}` : ""}
           ${SETTINGS.vatNumber ? ` · الرقم الضريبي: ${esc(SETTINGS.vatNumber)}` : ""}
           ${SETTINGS.businessCenterUrl ? ` · <a href="${esc(SETTINGS.businessCenterUrl)}" target="_blank" rel="noopener">موثّق في المركز السعودي للأعمال</a>` : ""}
         </div>
@@ -628,12 +629,12 @@ function renderHowItWorks() {
 }
 
 function renderAbout() {
-  setMeta("عن إتقان | اتقان لخدمات الأعمال", "اتقان لخدمات الأعمال، شركة سعودية تأسست عام 2024، تقدّم دراسات واستشارات لأصحاب المشاريع والشركات القائمة.");
+  setMeta("عن إتقان | اتقان لخدمات الأعمال", "اتقان لخدمات الأعمال، شركة سعودية تأسست عام 2025، تقدّم دراسات واستشارات لأصحاب المشاريع والشركات القائمة.");
   layout(`
     <div class="wrap">
       <div class="section-heading"><div class="sh-text"><span class="eyebrow">من نحن</span><h2>عن إتقان</h2></div></div>
-      <p class="service-lede">اتقان لخدمات الأعمال — شركة سعودية تأسست عام ${esc(SETTINGS.founded?.year || "2024")}، تقدّم دراسات واستشارات لأصحاب المشاريع الجديدة والشركات القائمة في السوق السعودي، بهدف مساعدتهم على اتخاذ قرارات أعمال مبنية على تحليل واضح لا على تخمين. ومن خدماتنا تقييم الشركات والشركات العائلية بحياد وسرية تامة.</p>
-      ${(SETTINGS.crNumber || SETTINGS.vatNumber) ? `<p class="note-muted">${SETTINGS.crNumber ? `سجل تجاري: ${esc(SETTINGS.crNumber)}` : ""}${SETTINGS.crNumber && SETTINGS.vatNumber ? " · " : ""}${SETTINGS.vatNumber ? `الرقم الضريبي: ${esc(SETTINGS.vatNumber)}` : ""}</p>` : ""}
+      <p class="service-lede">اتقان لخدمات الأعمال — شركة سعودية تأسست عام ${esc(SETTINGS.founded?.year || "2025")}، تقدّم دراسات واستشارات لأصحاب المشاريع الجديدة والشركات القائمة في السوق السعودي، بهدف مساعدتهم على اتخاذ قرارات أعمال مبنية على تحليل واضح لا على تخمين. ومن خدماتنا تقييم الشركات والشركات العائلية بحياد وسرية تامة.</p>
+      ${(SETTINGS.crNumber || SETTINGS.vatNumber) ? `<p class="note-muted">${SETTINGS.crNumber ? `الرقم الوطني الموحد: ${esc(SETTINGS.crNumber)}` : ""}${SETTINGS.crNumber && SETTINGS.vatNumber ? " · " : ""}${SETTINGS.vatNumber ? `الرقم الضريبي: ${esc(SETTINGS.vatNumber)}` : ""}</p>` : ""}
       <div class="why-grid">
         <div class="why-card"><div class="icon-badge">${ICONS["advisory-studies"]}</div><h4>تحليل عملي</h4><p>نركز على المعلومات التي تساعدك في اتخاذ القرار.</p></div>
         <div class="why-card"><div class="icon-badge">${ICONS["map"]}</div><h4>فهم للسوق السعودي</h4><p>نراعي بيئة الأعمال والسوق في المملكة.</p></div>

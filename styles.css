@@ -980,7 +980,7 @@ a.stage-svc:hover { border-color: var(--brass); color: var(--brass); }
 
 /* حركة دخول خفيفة */
 @media (prefers-reduced-motion: no-preference) {
-  main > * { animation: fadeUp .45s ease both; }
+  #app main > * { animation: fadeUp .45s ease both; }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 }
 

@@ -10,10 +10,10 @@
 window.ITQAN_SETTINGS = {
   contactEmail: "info@itqanbs.sa",
   mainSiteUrl: "https://www.itqanbs.sa",
-  founded: { year: "2024", note: "شركة سعودية" },
+  founded: { year: "2025", note: "شركة سعودية" },
 
   // بيانات الثقة — تظهر في الفوتر وصفحة "عن إتقان" فقط إذا عُبّئت
-  crNumber: "",        // رقم السجل التجاري
+  crNumber: "7049388205", // الرقم الوطني الموحد للمنشأة
   vatNumber: "",       // الرقم الضريبي
   businessCenterUrl: "", // رابط توثيق المركز السعودي للأعمال
   legal: {
