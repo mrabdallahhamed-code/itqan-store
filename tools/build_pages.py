@@ -141,9 +141,10 @@ for s in C["services"]:
     body = f"""
 <nav class="breadcrumb" aria-label="مسار التصفح"><a href="/">الرئيسية</a><span class="sep">/</span><a href="/services/">الخدمات</a><span class="sep">/</span>{e(s['title'])}</nav>
 <article class="sp-article">
-  <h1 class="pd-title">{e(s['title'])}</h1>
+  <h1 class="pd-title">{e(s.get('h1') or s['title'])}</h1>
   <p class="sp-lead">{e(s['short'])}</p>
   <p class="service-lede">{e(s['full'])}</p>
+  {''.join(f'<section class="pd-block"><h2 class="sp-h2">{e(h)}</h2><p class="sp-p">{e(t)}</p></section>' for h, t in s.get('sections', []))}
   {f'<div class="svc-meta">{meta_html}</div>' if meta_html else ''}
   <section class="pd-block"><h2 class="sp-h2">ماذا تشمل الخدمة؟</h2>
     <ul class="sp-list">{''.join(f'<li>{e(i)}</li>' for i in s['items'])}</ul></section>
@@ -153,6 +154,7 @@ for s in C["services"]:
     <div><b>لا توجد أسعار ثابتة</b><span>يصلك عرض سعر واضح بعد فهم احتياجك، ولا يبدأ العمل إلا بموافقتك.</span></div>
     <a class="btn btn-primary" href="/#/request?service={s['slug']}">اطلب عرض سعر لهذه الخدمة</a>
   </div>
+  {('<section class="pd-block"><h2 class="sp-h2">أسئلة عن هذه الخدمة</h2>' + ''.join(f'<div class="sp-faq"><h3>{e(q)}</h3><p>{e(a)}</p></div>' for q, a in s.get('faqs', [])) + '</section>') if s.get('faqs') else ''}
   <section class="pd-block"><h2 class="sp-h2">خدمات أخرى</h2>
     <div class="related-row">{''.join(f'<a class="related-chip" href="/services/{r["slug"]}/">{e(r["title"])}</a>' for r in related)}</div></section>
 </article>"""
@@ -165,7 +167,9 @@ for s in C["services"]:
          "offers": {"@type": "Offer", "availability": "https://schema.org/InStock", "priceSpecification": {"@type": "PriceSpecification", "priceCurrency": "SAR", "description": "عرض سعر حسب نطاق العمل"}, "url": BASE + f"/#/request?service={s['slug']}"}},
         crumbs(("الرئيسية", "/"), ("الخدمات", "/services/"), (s["title"], path)),
     ]
-    urls.append((page(path, f"{s['title']} | إتقان لخدمات الأعمال", s["short"][:158], body, ld, s.get("keywords", "")), "0.9"))
+    if s.get("faqs"):
+        ld.append({"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": q, "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in s["faqs"]]})
+    urls.append((page(path, s.get("seo_title") or f"{s['title']} | إتقان لخدمات الأعمال", s["short"][:158], body, ld, s.get("keywords", "")), "0.9"))
 
 # ---------- فهرس الخدمات ----------
 cards = "".join(f"""<a class="sp-card" href="/services/{s['slug']}/"><h2>{e(s['title'])}</h2><p>{e(s['short'])}</p><span>التفاصيل ←</span></a>""" for s in C["services"])

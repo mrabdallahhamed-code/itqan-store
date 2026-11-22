@@ -47,3 +47,5 @@
 .seo-fallback h1 { font-family: var(--font-display); font-size: 26px; }
 .seo-fallback a { color: var(--brass); }
 .js .seo-fallback { display: none; }
+.sp-p { line-height: 2; font-size: 15.5px; color: var(--ink-soft); margin: 0; }
+.sp-faq h3 { font-family: var(--font-display); font-size: 16px; margin: 0 0 8px; }
