@@ -33,8 +33,12 @@
 ## مسار الطلب
 طلب الخدمة ← تواصل الفريق ← عرض السعر ← موافقة العميل ← تحويل وإثبات ← اعتماد ← تنفيذ ← تسليم
 
-## SEO وأدوات الذكاء الاصطناعي
-- صفحات ثابتة قابلة للفهرسة: `/services/` و`/services/<slug>/` و`/stages/` و`/faq/` و`/about/`.
-- `llms.txt` و`llms-full.txt`: ملخص منظم للخدمات تقرؤه أدوات الذكاء الاصطناعي (ChatGPT، Claude، Perplexity، Gemini).
-- `robots.txt` يسمح صراحة لروبوتات الذكاء الاصطناعي، و`sitemap.xml` يضم كل الصفحات.
-- عند تعديل خدمة من لوحة التحكم: حدّث `tools/content.json` ثم شغّل `python3 tools/build_pages.py` (أو اطلب ذلك من Claude).
+## الروابط والأرشفة (SEO)
+- الموقع يستخدم روابط نظيفة بدل `#/`: مثل `/services/business-valuation/` و`/stages/` و`/request/` و`/track-order/`.
+  الروابط القديمة التي تبدأ بـ `#/` تتحول تلقائيًا للرابط الجديد (فلا تنكسر روابط الرسائل القديمة).
+- كل صفحة محفوظة مسبقًا كملف HTML كامل (Pre-rendering) يقرؤه جوجل والذكاء الاصطناعي دون انتظار JavaScript.
+- البناء: `python3 tools/build.py` (محلي من `tools/content.json`) أو `python3 tools/build.py --live` (من قاعدة البيانات).
+- GitHub Actions (`.github/workflows/prerender.yml`) يعيد البناء يوميًا وعند تعديل ملفات التطبيق، فأي خدمة تضيفها من لوحة التحكم تظهر كصفحة مؤرشفة خلال 24 ساعة.
+- النصوص الإضافية لكل خدمة (عنوان SEO، أقسام، أسئلة) في `tools/content.json` → يُولَّد منها `seo-content.js`.
+- `tools/shell.html` هو قالب التطبيق؛ أي تعديل على `<head>` يتم فيه ثم يُعاد البناء.
+- `robots.txt` يمنع أرشفة `/cart/` و`/track-order/` و`/done/`، و`sitemap.xml` يُولَّد تلقائيًا.

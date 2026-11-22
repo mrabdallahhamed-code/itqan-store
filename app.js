@@ -43,7 +43,7 @@ function updateCartBadge() {
 
 // ---------------- تطبيق الجوال (PWA) ----------------
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+  window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
 }
 let deferredInstall = null;
 window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); deferredInstall = e; wireInstall(); });
@@ -90,8 +90,8 @@ function wireInstall() {
 }
 
 function markActiveTab() {
-  const page = (location.hash.replace(/^#\/?/, "").split(/[/?]/)[0]) || "home";
-  const map = { home: "home", services: "services", service: "services", packages: "services", request: "request", cart: "cart", track: "track", done: "track" };
+  const page = location.pathname.split("/").filter(Boolean)[0] || "home";
+  const map = { home: "home", services: "services", stages: "services", request: "request", cart: "cart", "track-order": "track", done: "track" };
   document.querySelectorAll(".tabbar a").forEach((a) => a.classList.toggle("active", a.dataset.tab === map[page]));
 }
 
@@ -114,20 +114,58 @@ const STATUS = {
   cancelled: "ملغي",
 };
 
-function setMeta(title, description) {
+const SITE = "https://store.itqanbs.sa";
+function setMeta(title, description, opts = {}) {
   document.title = title;
-  const m = document.querySelector('meta[name="description"]');
-  if (m && description) m.setAttribute("content", description);
+  const set = (sel, attr, val) => { const el = document.querySelector(sel); if (el && val) el.setAttribute(attr, val); };
+  set('meta[name="description"]', "content", description);
+  set('meta[property="og:title"]', "content", title);
+  set('meta[property="og:description"]', "content", description);
+  const url = SITE + location.pathname;
+  set('link[rel="canonical"]', "href", url);
+  set('meta[property="og:url"]', "content", url);
+  let robots = document.querySelector('meta[name="robots"]');
+  if (robots) robots.setAttribute("content", opts.noindex ? "noindex, follow" : "index, follow, max-image-preview:large, max-snippet:-1");
 }
 
-function parseHash() {
-  const raw = location.hash.replace(/^#\/?/, "");
-  const [pathPart, query = ""] = raw.split("?");
+function parsePath() {
   return {
-    parts: pathPart.split("/").filter(Boolean).map(decodeURIComponent),
-    params: new URLSearchParams(query),
+    parts: location.pathname.split("/").filter(Boolean).map(decodeURIComponent),
+    params: new URLSearchParams(location.search),
   };
 }
+
+// الروابط القديمة (#/...) تُحوَّل تلقائيًا إلى الروابط النظيفة الجديدة
+(function upgradeLegacyHash() {
+  const h = location.hash;
+  if (!h.startsWith("#/")) return;
+  const [path, q = ""] = h.slice(2).split("?");
+  const [page, arg] = path.split("/").filter(Boolean);
+  const qs = new URLSearchParams(q);
+  const map = { services: "/services/", packages: "/stages/", "how-it-works": "/how-it-works/", about: "/about/", faq: "/faq/", contact: "/contact/", cart: "/cart/", request: "/request/" };
+  let to = "/";
+  if (page === "service" && arg) to = `/services/${arg}/`;
+  else if (page === "track") { to = "/track-order/"; if (arg) qs.set("n", arg); }
+  else if (page === "done") { to = "/done/"; if (arg) qs.set("n", arg); }
+  else if (map[page]) to = map[page];
+  const s = qs.toString();
+  history.replaceState(null, "", to + (s ? "?" + s : ""));
+})();
+
+function navigate(url) {
+  history.pushState(null, "", url);
+  route();
+}
+document.addEventListener("click", (e) => {
+  const a = e.target.closest("a[href]");
+  if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || a.target === "_blank") return;
+  const url = new URL(a.href, location.href);
+  if (url.origin !== location.origin || /\.(txt|xml|html|png|jpg|webp|pdf)$/.test(url.pathname) || url.pathname.startsWith("/admin")) return;
+  if (url.pathname === location.pathname && url.search === location.search && url.hash) return;
+  e.preventDefault();
+  navigate(url.pathname + url.search);
+});
+window.addEventListener("popstate", route);
 
 const listItems = (x) => (Array.isArray(x.items) ? x.items : []);
 
@@ -215,26 +253,26 @@ async function loadPackages() {
 
 function layout(content) {
   const svcLinks = (SERVICES_CACHE || []).slice(0, 5)
-    .map((s) => `<a href="#/service/${esc(s.slug)}">${esc(s.title)}</a>`).join("");
+    .map((s) => `<a href="/services/${esc(s.slug)}/">${esc(s.title)}</a>`).join("");
   const social = SETTINGS.social || [];
   const legal = SETTINGS.legal || {};
   const eco = (SETTINGS.ecosystem || []).filter((e) => e.url);
   app.innerHTML = `
     <header class="site-header">
       <div class="wrap">
-        <a href="#/" class="brand">
-          <span class="logo-chip"><img src="logo.png" alt="شعار اتقان لخدمات الأعمال"></span>
+        <a href="/" class="brand">
+          <span class="logo-chip"><picture><source srcset="/logo-96.webp" type="image/webp"><img src="/logo.png" alt="شعار اتقان لخدمات الأعمال" width="48" height="38"></picture></span>
           <span class="brand-text">متجر اتقان<small>استشارات ودراسات وخطط أعمال</small></span>
         </a>
         <nav class="nav-links" id="navLinks">
-          <a href="#/">الرئيسية</a>
-          <a href="#/services">الخدمات</a>
-          <a href="#/packages">ابدأ حسب وضعك</a>
-          <a href="#/how-it-works">كيف نعمل</a>
-          <a href="#/about">عن إتقان</a>
-          <a href="#/contact">تواصل معنا</a>
-          <a href="#/request" class="btn btn-primary">اطلب عرض سعر</a>
-          <a href="#/cart" class="cart-link" aria-label="قائمة طلبي" title="قائمة طلبي">
+          <a href="/">الرئيسية</a>
+          <a href="/services/">الخدمات</a>
+          <a href="/stages/">ابدأ حسب وضعك</a>
+          <a href="/how-it-works/">كيف نعمل</a>
+          <a href="/about/">عن إتقان</a>
+          <a href="/contact/">تواصل معنا</a>
+          <a href="/request/" class="btn btn-primary">اطلب عرض سعر</a>
+          <a href="/cart/" class="cart-link" aria-label="قائمة طلبي" title="قائمة طلبي">
             <svg viewBox="0 0 24 24"><path d="M4 6h2l2 11h10l2-8H7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/></svg>
             <span class="cart-badge" id="cartCount" style="display:none;">0</span>
           </a>
@@ -249,21 +287,21 @@ function layout(content) {
       <div class="wrap">
         <div class="footer-grid">
           <div>
-            <div class="footer-brand"><img src="logo.png" alt="اتقان"><span>اتقان لخدمات الأعمال</span></div>
+            <div class="footer-brand"><picture><source srcset="/logo-96.webp" type="image/webp"><img src="/logo.png" alt="شعار اتقان" width="43" height="34"></picture><span>اتقان لخدمات الأعمال</span></div>
             <p class="footer-desc">دراسات متخصصة، استشارات، إعادة هيكلة، وخطط تطوير أعمال — بعرض سعر واضح قبل أي التزام.</p>
             ${social.length ? `<div class="footer-social">${social.map((s) => `<a href="${esc(s.url)}" target="_blank" rel="noopener" title="${esc(s.name)}">${esc(s.name)}</a>`).join("")}</div>` : ""}
           </div>
           <div class="footer-col">
             <h5>الخدمات</h5>
-            ${svcLinks || `<a href="#/services">كل الخدمات</a>`}
+            ${svcLinks || `<a href="/services/">كل الخدمات</a>`}
           </div>
           <div class="footer-col">
             <h5>روابط</h5>
-            <a href="#/how-it-works">كيف نعمل</a>
-            <a href="#/packages">ابدأ حسب وضعك</a>
-            <a href="#/about">عن إتقان</a>
-            <a href="#/faq">الأسئلة الشائعة</a>
-            <a href="#/track">تتبع طلبك</a>
+            <a href="/how-it-works/">كيف نعمل</a>
+            <a href="/stages/">ابدأ حسب وضعك</a>
+            <a href="/about/">عن إتقان</a>
+            <a href="/faq/">الأسئلة الشائعة</a>
+            <a href="/track-order/">تتبع طلبك</a>
             <a href="/services/">دليل الخدمات</a>
           </div>
           <div class="footer-col">
@@ -291,14 +329,14 @@ function layout(content) {
       <svg width="26" height="26" viewBox="0 0 32 32" fill="white"><path d="M16 3C9.4 3 4 8.4 4 15c0 2.4.7 4.6 1.9 6.5L4 29l7.7-1.9c1.8 1 3.9 1.5 6.3 1.5 6.6 0 12-5.4 12-12S22.6 3 16 3zm0 21.8c-2 0-3.9-.6-5.5-1.6l-.4-.2-4.6 1.2 1.2-4.5-.3-.4C5.4 17.7 4.8 16.4 4.8 15c0-6.2 5-11.2 11.2-11.2S27.2 8.8 27.2 15 22.2 24.8 16 24.8zm6.1-8.4c-.3-.2-2-1-2.3-1.1-.3-.1-.5-.2-.8.2-.2.3-.9 1.1-1.1 1.3-.2.2-.4.2-.7.1-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-2-1.8-2.3-.2-.3 0-.5.1-.6.1-.1.3-.4.5-.5.2-.2.2-.3.3-.5.1-.2 0-.4 0-.6-.1-.2-.8-1.9-1.1-2.6-.3-.7-.6-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.3-1.2 1.1-1.2 2.8s1.2 3.3 1.4 3.5c.2.2 2.4 3.7 5.8 5.1.8.3 1.4.6 1.9.7.8.3 1.5.2 2.1.1.6-.1 2-.8 2.3-1.6.3-.8.3-1.4.2-1.6-.1-.1-.3-.2-.6-.4z"/></svg>
     </a>
     <nav class="tabbar" aria-label="التنقل السريع">
-      <a href="#/" data-tab="home"><svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z" stroke-linejoin="round"/></svg><span>الرئيسية</span></a>
-      <a href="#/services" data-tab="services"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg><span>الخدمات</span></a>
-      <a href="#/request" data-tab="request" class="tab-main"><span class="tab-main-ic"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg></span><span>عرض سعر</span></a>
-      <a href="#/cart" data-tab="cart"><span class="tab-ic-wrap"><svg viewBox="0 0 24 24"><path d="M4 6h2l2 11h10l2-8H7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/></svg><b class="tab-badge" id="tabCartCount"></b></span><span>طلبي</span></a>
-      <a href="#/track" data-tab="track"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4" stroke-linecap="round"/></svg><span>تتبع</span></a>
+      <a href="/" data-tab="home"><svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4.5v-6h-5v6H5a1 1 0 0 1-1-1z" stroke-linejoin="round"/></svg><span>الرئيسية</span></a>
+      <a href="/services/" data-tab="services"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg><span>الخدمات</span></a>
+      <a href="/request/" data-tab="request" class="tab-main"><span class="tab-main-ic"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke-linecap="round"/></svg></span><span>عرض سعر</span></a>
+      <a href="/cart/" data-tab="cart"><span class="tab-ic-wrap"><svg viewBox="0 0 24 24"><path d="M4 6h2l2 11h10l2-8H7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.4"/><circle cx="17" cy="20" r="1.4"/></svg><b class="tab-badge" id="tabCartCount"></b></span><span>طلبي</span></a>
+      <a href="/track-order/" data-tab="track"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4" stroke-linecap="round"/></svg><span>تتبع</span></a>
     </nav>
     <div class="install-banner" id="installBanner" hidden>
-      <img src="icon-192.png" alt="">
+      <picture><source srcset="/icon-192.webp" type="image/webp"><img src="/icon-192.png" alt="أيقونة متجر إتقان" width="44" height="44"></picture>
       <div class="ib-text"><b>ثبّت متجر إتقان على جوالك</b><small id="installHint">للوصول السريع وتتبع طلبك بضغطة واحدة</small></div>
       <button class="btn btn-primary" id="installBtn">تثبيت</button>
       <button class="ib-close" id="installClose" aria-label="إغلاق">×</button>
@@ -315,7 +353,7 @@ function layout(content) {
 const AR_NUM = (n) => String(n).padStart(2, "0").replace(/\d/g, (d) => "٠١٢٣٤٥٦٧٨٩"[d]);
 const serviceTile = (s, i = 0) => `
   <div class="shop-tile" data-id="${esc(s.id)}">
-    <a href="#/service/${esc(s.slug)}" class="shop-tile-link">
+    <a href="/services/${esc(s.slug)}/" class="shop-tile-link">
       <div class="shop-tile-top"><span class="row-icon">${ICONS[s.slug] || ICONS["custom-corporate-services"]}</span><span class="tile-num">${AR_NUM(i + 1)}</span></div>
       <div class="shop-tile-body">
         <h3 class="service-row-title">${esc(s.title)}</h3>
@@ -324,7 +362,7 @@ const serviceTile = (s, i = 0) => `
       </div>
     </a>
     <div class="shop-tile-actions">
-      <a href="#/service/${esc(s.slug)}" class="shop-tile-cta">التفاصيل ←</a>
+      <a href="/services/${esc(s.slug)}/" class="shop-tile-cta">التفاصيل ←</a>
       <button class="add-cart-btn" data-add="${esc(s.id)}" data-title="${esc(s.title)}" data-slug="${esc(s.slug)}">+ أضف للطلب</button>
     </div>
   </div>`;
@@ -356,14 +394,14 @@ const packageCard = (k, i = 0) => {
     ${svcs.length ? `
       <div class="stage-label">الخدمات المقترحة لك</div>
       <div class="stage-svcs">
-        ${svcs.map((x) => `<a href="#/service/${esc(x.slug)}" class="stage-svc"><span class="tick">✓</span>${esc(x.title)}</a>`).join("")}
+        ${svcs.map((x) => `<a href="/services/${esc(x.slug)}/" class="stage-svc"><span class="tick">✓</span>${esc(x.title)}</a>`).join("")}
         ${listItems(k).map((i) => `<div class="stage-svc stage-extra"><span class="tick">✓</span>${esc(i)}</div>`).join("")}
       </div>`
     : `<ul class="contents-list">${listItems(k).map((i) => `<li>${esc(i)}</li>`).join("")}</ul>`}
     ${svcs.length
       ? `<button class="btn btn-primary stage-btn" data-stage="${esc(k.slug)}">اطلب هذه الخدمات معًا</button>
          <small class="stage-hint">تُضاف لقائمة طلبك ويمكنك حذف أو إضافة ما تشاء قبل الإرسال.</small>`
-      : `<a class="btn btn-primary" href="#/request?package=${esc(k.slug)}">اطلب عرض سعر</a>`}
+      : `<a class="btn btn-primary" href="/request/?package=${esc(k.slug)}">اطلب عرض سعر</a>`}
   </div>`;
 };
 
@@ -376,33 +414,45 @@ function wireStageButtons(container, packages) {
       const extras = listItems(k);
       const label = k.title + (extras.length ? ` — يشمل أيضًا: ${extras.join("، ")}` : "");
       try { sessionStorage.setItem("itqan_stage", label); } catch (_) {}
-      location.hash = "#/cart";
+      navigate("/cart/");
     });
   });
 }
 
 // ---------------- Router ----------------
-window.addEventListener("hashchange", route);
 window.addEventListener("DOMContentLoaded", route);
 
 function route() {
-  const { parts, params } = parseHash();
+  const { parts, params } = parsePath();
+  ["service-schema", "faq-schema"].forEach((id) => document.getElementById(id)?.remove());
   window.scrollTo(0, 0);
   document.getElementById("navLinks")?.classList.remove("open");
   const [page, arg] = parts;
   if (!page) return renderHome();
-  if (page === "services") return renderServices();
-  if (page === "service") return renderService(arg);
-  if (page === "packages") return renderPackages();
+  if (page === "services") return arg ? renderService(arg) : renderServices();
+  if (page === "stages") return renderPackages();
   if (page === "how-it-works") return renderHowItWorks();
   if (page === "about") return renderAbout();
   if (page === "faq") return renderFaqPage();
   if (page === "contact") return renderContact();
   if (page === "cart") return renderCart();
   if (page === "request") return renderRequestForm(params);
-  if (page === "done") return renderDone(arg);
-  if (page === "track") return renderTrack(arg);
-  return renderHome();
+  if (page === "done") return renderDone(params.get("n"));
+  if (page === "track-order") return renderTrack(params.get("n"));
+  return renderNotFound();
+}
+
+function renderNotFound() {
+  setMeta("الصفحة غير موجودة | متجر إتقان", "", { noindex: true });
+  layout(`
+    <div class="center-page">
+      <h1 style="font-family:var(--font-display);">الصفحة غير موجودة</h1>
+      <p style="color:var(--slate);">ربما تغيّر الرابط. تصفح خدماتنا أو عد للرئيسية.</p>
+      <div class="hero-actions" style="justify-content:center;">
+        <a href="/services/" class="btn btn-primary">الخدمات</a>
+        <a href="/" class="btn btn-ghost">الرئيسية</a>
+      </div>
+    </div>`);
 }
 
 // ---------------- Home ----------------
@@ -418,11 +468,11 @@ async function renderHome() {
       <div class="wrap hero-grid">
         <div>
           <span class="eyebrow eyebrow-light">اتقان لخدمات الأعمال</span>
-          <h1>قرارات أعمال أفضل<br><span class="hl">تبدأ بتحليل واضح</span></h1>
+          <h1>دراسات الجدوى واستشارات الأعمال في السعودية<span class="h1-sub">قرارات أفضل <span class="hl">تبدأ بتحليل واضح</span></span></h1>
           <p>دراسات واستشارات تساعدك على فهم السوق، تقييم المشروع، وتحليل الجدوى قبل اتخاذ القرار.</p>
           <div class="hero-actions">
-            <a href="#/services" class="btn btn-primary">تصفح الخدمات</a>
-            <a href="#/packages" class="btn btn-outline-light">ابدأ حسب وضعك</a>
+            <a href="/services/" class="btn btn-primary">تصفح الخدمات</a>
+            <a href="/stages/" class="btn btn-outline-light">ابدأ حسب وضعك</a>
           </div>
         </div>
         <div class="hero-card">
@@ -434,10 +484,10 @@ async function renderHome() {
     </section>
 
     <div class="wrap">
-      <div class="section-heading"><div class="sh-text"><span class="eyebrow">ماذا نقدّم</span><h2>خدماتنا</h2></div><a href="#/services" class="count">عرض الكل ←</a></div>
+      <div class="section-heading"><div class="sh-text"><span class="eyebrow">ماذا نقدّم</span><h2>خدماتنا</h2></div><a href="/services/" class="count">عرض الكل ←</a></div>
       <div id="homeServices" class="shop-grid"><div class="loading">جارِ التحميل…</div></div>
 
-      <div class="section-heading"><div class="sh-text"><span class="eyebrow">لا تعرف من أين تبدأ؟</span><h2>ابدأ حسب وضعك</h2></div><a href="#/packages" class="count">التفاصيل ←</a></div>
+      <div class="section-heading"><div class="sh-text"><span class="eyebrow">لا تعرف من أين تبدأ؟</span><h2>ابدأ حسب وضعك</h2></div><a href="/stages/" class="count">التفاصيل ←</a></div>
       <p class="note-muted">اختر الوضع الأقرب لك، وسنقترح عليك الخدمات المناسبة لمرحلتك.</p>
       <div id="homePackages" class="pkg-grid"><div class="loading">جارِ التحميل…</div></div>
 
@@ -467,7 +517,7 @@ async function renderHome() {
     <section class="cta-band">
       <h2>هل لديك مشروع وتحتاج إلى صورة أوضح قبل اتخاذ القرار؟</h2>
       <p>اختر الخدمة المناسبة وابدأ طلبك.</p>
-      <a href="#/request" class="btn btn-primary">اطلب عرض سعر</a>
+      <a href="/request/" class="btn btn-primary">اطلب عرض سعر</a>
     </section>
   `);
 
@@ -493,10 +543,10 @@ function injectSchema(id, obj) {
 
 // ---------------- Services ----------------
 async function renderServices() {
-  setMeta("الخدمات | اتقان", "دراسات متخصصة واستشارية، تقييم الشركات والشركات العائلية، إعادة هيكلة، خطط تطوير أعمال، وخدمات مخصصة للشركات القائمة.");
+  setMeta("الخدمات: دراسات الجدوى والاستشارات وتقييم الشركات | إتقان", "دراسات الجدوى والسوق، الاستشارات الإدارية، تقييم الشركات والشركات العائلية، إعادة هيكلة، خطط تطوير أعمال، وخدمات مخصصة للشركات القائمة.");
   layout(`
     <div class="wrap">
-      <div class="section-heading"><div class="sh-text"><span class="eyebrow">ماذا نقدّم</span><h2>الخدمات</h2></div></div>
+      <div class="section-heading"><div class="sh-text"><span class="eyebrow">ماذا نقدّم</span><h1 class="page-h1">الخدمات</h1></div></div>
       <p class="note-muted">اختر الخدمة، واطلبها مباشرة — سيصلك عرض سعر واضح قبل أي التزام.</p>
       <div id="list" class="shop-grid"><div class="loading">جارِ التحميل…</div></div>
     </div>`);
@@ -515,22 +565,27 @@ async function renderService(slug) {
     loadServices().then((x) => x || []),
   ]);
   if (!s) {
-    layout(`<div class="wrap"><div class="empty-state" style="margin-top:40px;">هذه الخدمة غير متاحة. <a href="#/services">عودة للخدمات</a></div></div>`);
+    layout(`<div class="wrap"><div class="empty-state" style="margin-top:40px;">هذه الخدمة غير متاحة. <a href="/services/">عودة للخدمات</a></div></div>`);
     return;
   }
-  setMeta(`${s.title} | اتقان`, (s.short_description || "").slice(0, 155));
+  const seo = (window.ITQAN_SEO || {})[s.slug] || {};
+  setMeta(seo.seo_title || `${s.title} | إتقان لخدمات الأعمال`, (seo.meta_description || s.short_description || "").slice(0, 158));
 
   const items = listItems(s);
+  const sections = Array.isArray(seo.sections) ? seo.sections : [];
+  const faqs = Array.isArray(seo.faqs) ? seo.faqs : [];
   const related = allServices.filter((x) => x.slug !== s.slug).slice(0, 3);
 
   layout(`
     <div class="wrap">
       <div class="product-detail">
         <div>
-          <div class="breadcrumb"><a href="#/">الرئيسية</a><span class="sep">/</span><a href="#/services">الخدمات</a><span class="sep">/</span>${esc(s.title)}</div>
+          <div class="breadcrumb"><a href="/">الرئيسية</a><span class="sep">/</span><a href="/services/">الخدمات</a><span class="sep">/</span>${esc(s.title)}</div>
           <span class="detail-icon">${ICONS[s.slug] || ICONS["custom-corporate-services"]}</span>
-          <h1 class="pd-title" style="margin-top:14px;">${esc(s.title)}</h1>
+          <h1 class="pd-title" style="margin-top:14px;">${esc(seo.h1 || s.title)}</h1>
+          ${seo.h1 ? `<p class="sp-lead">${esc(s.short_description)}</p>` : ""}
           <p class="service-lede">${esc(s.full_description || s.short_description)}</p>
+          ${sections.map(([h, t]) => `<div class="pd-block"><h2 class="pd-h">${esc(h)}</h2><p class="sp-p">${esc(t)}</p></div>`).join("")}
 
           ${(s.target_customer || s.duration_note || s.requirements_note || s.delivery_note) ? `
             <div class="svc-meta">
@@ -542,12 +597,12 @@ async function renderService(slug) {
 
           ${items.length ? `
             <div class="pd-block">
-              <h4>ما تحصل عليه</h4>
+              <h2 class="pd-h">ما تحصل عليه</h2>
               <div class="deliverables">${items.map((i) => `<div class="deliverable"><span class="tick">✓</span><span>${esc(i)}</span></div>`).join("")}</div>
             </div>` : ""}
 
           <div class="pd-block">
-            <h4>كيف نبدأ معك</h4>
+            <h2 class="pd-h">كيف نبدأ معك</h2>
             <div class="mini-steps">
               <div class="mini-step"><span class="n">١</span><span>تطلب عرض سعر وتوضح لنا هدفك من هذه الخدمة.</span></div>
               <div class="mini-step"><span class="n">٢</span><span>نتواصل معك لفهم احتياجك بدقة ونحدد نطاق العمل المناسب.</span></div>
@@ -555,23 +610,29 @@ async function renderService(slug) {
             </div>
           </div>
 
+          ${faqs.length ? `
+            <div class="pd-block">
+              <h2 class="pd-h">أسئلة عن هذه الخدمة</h2>
+              ${faqs.map(([q, a]) => `<div class="sp-faq"><h3>${esc(q)}</h3><p>${esc(a)}</p></div>`).join("")}
+            </div>` : ""}
+
           ${related.length ? `
             <div class="pd-block">
-              <h4>خدمات أخرى قد تهمك</h4>
-              <div class="related-row">${related.map((r) => `<a class="related-chip" href="#/service/${esc(r.slug)}">${esc(r.title)}</a>`).join("")}</div>
+              <h2 class="pd-h">خدمات أخرى قد تهمك</h2>
+              <div class="related-row">${related.map((r) => `<a class="related-chip" href="/services/${esc(r.slug)}/">${esc(r.title)}</a>`).join("")}</div>
             </div>` : ""}
         </div>
         <div class="buy-box">
-          <h4 style="font-family:var(--font-display);margin:0 0 14px;">ابدأ بطلب عرض سعر</h4>
+          <div class="buy-title">ابدأ بطلب عرض سعر</div>
           ${priceFrom(s)}
           <ul class="includes-check">
             <li>عرض سعر واضح قبل أي التزام</li>
             <li>نطاق عمل مخصص لاحتياجك</li>
             <li>لا يبدأ العمل إلا بعد موافقتك</li>
           </ul>
-          <a href="#/request?service=${esc(s.slug)}" class="btn btn-primary" style="display:block;text-align:center;">اطلب عرض سعر لهذه الخدمة</a>
+          <a href="/request/?service=${esc(s.slug)}" class="btn btn-primary" style="display:block;text-align:center;">اطلب عرض سعر لهذه الخدمة</a>
           <button class="btn btn-ghost" id="detailAddCartBtn" style="width:100%;margin-top:10px;" data-add="${esc(s.id)}" data-title="${esc(s.title)}" data-slug="${esc(s.slug)}">+ أضفها لطلب يضم عدة خدمات</button>
-          <a href="#/cart" style="display:block;text-align:center;margin-top:10px;font-size:13px;color:var(--slate);">عرض قائمة طلبي</a>
+          <a href="/cart/" style="display:block;text-align:center;margin-top:10px;font-size:13px;color:var(--slate);">عرض قائمة طلبي</a>
         </div>
       </div>
     </div>`);
@@ -583,24 +644,39 @@ async function renderService(slug) {
     btn.disabled = true;
   });
 
+  const svcUrl = `${SITE}/services/${s.slug}/`;
   injectSchema("service-schema", {
     "@context": "https://schema.org",
-    "@type": "Service",
-    serviceType: s.title,
-    name: s.title,
-    description: s.short_description || s.full_description,
-    provider: { "@type": "ProfessionalService", name: "اتقان لخدمات الأعمال", url: "https://store.itqanbs.sa/" },
-    areaServed: "SA",
-    ...(s.price_from ? { offers: { "@type": "Offer", priceCurrency: "SAR", price: s.price_from } } : {}),
+    "@graph": [
+      {
+        "@type": "Service",
+        "@id": svcUrl + "#service",
+        url: svcUrl,
+        serviceType: s.title,
+        name: seo.h1 || s.title,
+        description: s.full_description || s.short_description,
+        provider: { "@id": SITE + "/#org" },
+        areaServed: { "@type": "Country", name: "المملكة العربية السعودية" },
+        inLanguage: "ar",
+        ...(items.length ? { hasOfferCatalog: { "@type": "OfferCatalog", name: "ما تشمله الخدمة", itemListElement: items.map((i) => ({ "@type": "Offer", itemOffered: { "@type": "Service", name: i } })) } } : {}),
+        ...(s.price_from ? { offers: { "@type": "Offer", priceCurrency: "SAR", price: s.price_from } } : {}),
+      },
+      { "@type": "BreadcrumbList", itemListElement: [
+        { "@type": "ListItem", position: 1, name: "الرئيسية", item: SITE + "/" },
+        { "@type": "ListItem", position: 2, name: "الخدمات", item: SITE + "/services/" },
+        { "@type": "ListItem", position: 3, name: s.title, item: svcUrl },
+      ] },
+      ...(faqs.length ? [{ "@type": "FAQPage", mainEntity: faqs.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) }] : []),
+    ],
   });
 }
 
 // ---------------- Packages ----------------
 async function renderPackages() {
-  setMeta("ابدأ حسب وضعك | اتقان", "مشروع جديد، شركة قائمة تريد النمو، شركة تستعد لمستثمر أو تمويل، أو شركة عائلية — اختر وضعك ونقترح لك الخدمات المناسبة.");
+  setMeta("ابدأ حسب وضعك: مشروع جديد، شركة تريد النمو، أو تستعد لمستثمر | إتقان", "مشروع جديد، شركة قائمة تريد النمو، أو شركة تستعد لمستثمر أو تمويل أو تخارج — اختر وضعك ونقترح لك الخدمات المناسبة.");
   layout(`
     <div class="wrap">
-      <div class="section-heading"><div class="sh-text"><span class="eyebrow">اختر مرحلتك</span><h2>ابدأ حسب وضعك</h2></div></div>
+      <div class="section-heading"><div class="sh-text"><span class="eyebrow">اختر مرحلتك</span><h1 class="page-h1">ابدأ حسب وضعك</h1></div></div>
       <div class="distinguish-note">
         اختر الوضع الأقرب لشركتك، وسنقترح عليك الخدمات المناسبة لهذه المرحلة. يمكنك طلبها معًا، أو فتح أي خدمة لمعرفة تفاصيلها، ويصلك عرض سعر واحد بعد فهم احتياجك.
       </div>
@@ -619,11 +695,11 @@ function renderHowItWorks() {
   setMeta("كيف نعمل | اتقان", "أربع خطوات بسيطة من طلب الخدمة حتى استلام المخرجات.");
   layout(`
     <div class="wrap">
-      <div class="section-heading"><div class="sh-text"><span class="eyebrow">أربع خطوات</span><h2>كيف تحصل على الخدمة؟</h2></div></div>
+      <div class="section-heading"><div class="sh-text"><span class="eyebrow">أربع خطوات</span><h1 class="page-h1">كيف تحصل على الخدمة؟</h1></div></div>
       ${STEPS_HTML}
       <div class="cta-band" style="margin-top:12px;">
         <h2>جاهز تبدأ؟</h2>
-        <a href="#/request" class="btn btn-primary">اطلب عرض سعر</a>
+        <a href="/request/" class="btn btn-primary">اطلب عرض سعر</a>
       </div>
     </div>`);
 }
@@ -632,7 +708,7 @@ function renderAbout() {
   setMeta("عن إتقان | اتقان لخدمات الأعمال", "اتقان لخدمات الأعمال، شركة سعودية تأسست عام 2025، تقدّم دراسات واستشارات لأصحاب المشاريع والشركات القائمة.");
   layout(`
     <div class="wrap">
-      <div class="section-heading"><div class="sh-text"><span class="eyebrow">من نحن</span><h2>عن إتقان</h2></div></div>
+      <div class="section-heading"><div class="sh-text"><span class="eyebrow">من نحن</span><h1 class="page-h1">عن إتقان</h1></div></div>
       <p class="service-lede">اتقان لخدمات الأعمال — شركة سعودية تأسست عام ${esc(SETTINGS.founded?.year || "2025")}، تقدّم دراسات واستشارات لأصحاب المشاريع الجديدة والشركات القائمة في السوق السعودي، بهدف مساعدتهم على اتخاذ قرارات أعمال مبنية على تحليل واضح لا على تخمين. ومن خدماتنا تقييم الشركات والشركات العائلية بحياد وسرية تامة.</p>
       ${(SETTINGS.crNumber || SETTINGS.vatNumber) ? `<p class="note-muted">${SETTINGS.crNumber ? `الرقم الوطني الموحد: ${esc(SETTINGS.crNumber)}` : ""}${SETTINGS.crNumber && SETTINGS.vatNumber ? " · " : ""}${SETTINGS.vatNumber ? `الرقم الضريبي: ${esc(SETTINGS.vatNumber)}` : ""}</p>` : ""}
       <div class="why-grid">
@@ -642,7 +718,7 @@ function renderAbout() {
         <div class="why-card"><div class="icon-badge">${ICONS["custom-corporate-services"]}</div><h4>حلول حسب احتياج المشروع</h4><p>يمكن تخصيص الخدمة حسب طبيعة المشروع وهدف العميل.</p></div>
       </div>
       <div class="hero-actions">
-        <a href="#/services" class="btn btn-primary">تصفح الخدمات</a>
+        <a href="/services/" class="btn btn-primary">تصفح الخدمات</a>
         ${SETTINGS.mainSiteUrl ? `<a href="${esc(SETTINGS.mainSiteUrl)}" target="_blank" rel="noopener" class="btn btn-outline-light" style="color:var(--ink);border-color:var(--ink);">الموقع الرئيسي لاتقان ←</a>` : ""}
       </div>
     </div>`);
@@ -652,7 +728,7 @@ function renderFaqPage() {
   setMeta("الأسئلة الشائعة | اتقان", "إجابات على أكثر الأسئلة شيوعًا حول خدمات اتقان وطريقة الطلب والتسليم.");
   layout(`
     <div class="wrap">
-      <div class="section-heading"><div class="sh-text"><span class="eyebrow">لديك سؤال؟</span><h2>الأسئلة الشائعة</h2></div></div>
+      <div class="section-heading"><div class="sh-text"><span class="eyebrow">لديك سؤال؟</span><h1 class="page-h1">الأسئلة الشائعة</h1></div></div>
       ${faqHtml()}
     </div>`);
   wireFaq();
@@ -663,13 +739,13 @@ function renderContact() {
   const social = SETTINGS.social || [];
   layout(`
     <div class="center-page">
-      <h2 style="font-family:var(--font-display);">تواصل معنا</h2>
+      <h1 style="font-family:var(--font-display);">تواصل معنا</h1>
       <p style="color:var(--slate);">تواصل مع فريق اتقان مباشرة، أو أرسل طلبك وسنتواصل معك.</p>
       <div class="hero-actions" style="justify-content:center;margin-top:18px;">
         <a href="https://wa.me/${esc(CFG.whatsappSupportNumber)}" target="_blank" rel="noopener" class="btn btn-primary">تواصل عبر واتساب</a>
         <a href="mailto:${esc(SETTINGS.contactEmail || '')}" class="btn btn-outline-light" style="color:var(--ink);border-color:var(--ink);">${esc(SETTINGS.contactEmail || '')}</a>
       </div>
-      <a href="#/request" class="btn btn-ghost btn-inline" style="margin-top:14px;">أو أرسل طلب عرض سعر مباشرة</a>
+      <a href="/request/" class="btn btn-ghost btn-inline" style="margin-top:14px;">أو أرسل طلب عرض سعر مباشرة</a>
       ${social.length ? `<div class="footer-social" style="justify-content:center;margin-top:28px;">${social.map((s) => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.name)}</a>`).join("")}</div>` : ""}
     </div>`);
 }
@@ -687,13 +763,13 @@ async function renderRequestForm(params) {
 
   layout(`
     <div class="form-page wide">
-      <h2>اطلب عرض سعر</h2>
+      <h1 class="page-h1">اطلب عرض سعر</h1>
       <div class="sub">أخبرنا عن مشروعك وسنتواصل معك. لا يُطلب منك أي دفع الآن.</div>
 
       ${cartMode ? `
         <div class="summary-box" style="margin-bottom:22px;">
           <div style="font-weight:600;margin-bottom:8px;">طلبك يشمل:</div>
-          ${CART.map((i) => `<div class="summary-row"><span>${esc(i.title)}</span><a href="#/cart" style="color:var(--alert);font-size:12.5px;">إزالة</a></div>`).join("")}
+          ${CART.map((i) => `<div class="summary-row"><span>${esc(i.title)}</span><a href="/cart/" style="color:var(--alert);font-size:12.5px;">إزالة</a></div>`).join("")}
         </div>` : ""}
 
       <div id="formMsg"></div>
@@ -753,7 +829,7 @@ async function renderRequestForm(params) {
   document.getElementById("requestForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
-    if (fd.get("website")) { location.hash = "#/done/"; return; } // فخ للروبوتات
+    if (fd.get("website")) { navigate("/done/"); return; } // فخ للروبوتات
 
     const btn = e.target.querySelector("button[type=submit]");
     btn.disabled = true; btn.textContent = "جارِ الإرسال…";
@@ -789,15 +865,15 @@ async function renderRequestForm(params) {
     sessionStorage.setItem("itqan_last_email", fd.get("email"));
     if (cartMode) { CART = []; saveCart(); try { sessionStorage.removeItem("itqan_stage"); } catch (_) {} }
     sb.functions.invoke("send-order-email", { body: { request_id: row.out_request_id, event: "request_received" } }).catch(() => {});
-    location.hash = `#/done/${encodeURIComponent(row.out_request_number)}`;
+    navigate(`/done/?n=${encodeURIComponent(row.out_request_number)}`);
   });
 }
 
 function renderCart() {
-  setMeta("قائمة طلبي | اتقان", "الخدمات التي اخترتها قبل إرسال طلب عرض السعر.");
+  setMeta("قائمة طلبي | اتقان", "الخدمات التي اخترتها قبل إرسال طلب عرض السعر.", { noindex: true });
   layout(`
     <div class="wrap">
-      <div class="section-heading"><div class="sh-text"><span class="eyebrow">طلبك</span><h2>قائمة طلبي</h2></div></div>
+      <div class="section-heading"><div class="sh-text"><span class="eyebrow">طلبك</span><h1 class="page-h1">قائمة طلبي</h1></div></div>
       <p class="note-muted">اجمع الخدمات التي تحتاجها في طلب واحد، وسيصلك عرض سعر واحد يشملها. لا دفع الآن.</p>
       <div id="cartWrap"></div>
     </div>`);
@@ -805,7 +881,7 @@ function renderCart() {
   function draw() {
     const wrap = document.getElementById("cartWrap");
     if (!CART.length) {
-      wrap.innerHTML = `<div class="empty-state">قائمة طلبك فارغة. <a href="#/services">تصفح الخدمات</a></div>`;
+      wrap.innerHTML = `<div class="empty-state">قائمة طلبك فارغة. <a href="/services/">تصفح الخدمات</a></div>`;
       return;
     }
     let st = null; try { st = sessionStorage.getItem("itqan_stage"); } catch (_) {}
@@ -818,8 +894,8 @@ function renderCart() {
             <button class="btn btn-ghost" data-remove="${esc(i.id)}" style="width:auto;padding:6px 14px;font-size:12.5px;">إزالة</button>
           </div>`).join("")}
       </div>
-      <a href="#/request" class="btn btn-primary btn-inline">اطلب عرض سعر (${CART.length} خدمة)</a>
-      <a href="#/services" class="btn btn-ghost btn-inline" style="margin-right:10px;">إضافة خدمة أخرى</a>
+      <a href="/request/" class="btn btn-primary btn-inline">اطلب عرض سعر (${CART.length} خدمة)</a>
+      <a href="/services/" class="btn btn-ghost btn-inline" style="margin-right:10px;">إضافة خدمة أخرى</a>
     `;
     wrap.querySelectorAll("[data-remove]").forEach((b) => b.addEventListener("click", () => { removeFromCart(b.dataset.remove); draw(); }));
   }
@@ -827,14 +903,14 @@ function renderCart() {
 }
 
 function renderDone(number) {
-  setMeta("تم استلام طلبك | اتقان", "");
+  setMeta("تم استلام طلبك | اتقان", "", { noindex: true });
   layout(`
     <div class="center-page">
-      <h2 style="font-family:var(--font-display);">تم استلام طلبك</h2>
+      <h1 style="font-family:var(--font-display);">تم استلام طلبك</h1>
       ${number ? `<div class="order-number">${esc(number)}</div>` : ""}
       <p style="color:var(--slate);">شكرًا لتواصلك مع اتقان. سيتواصل معك فريقنا قريبًا لفهم احتياجك، ثم يصلك عرض السعر.
       ${number ? "احتفظ برقم الطلب لمتابعته في أي وقت." : ""}</p>
-      ${number ? `<a href="#/track/${encodeURIComponent(number)}" class="btn btn-ghost btn-inline" style="margin-top:14px;">متابعة الطلب</a>` : `<a href="#/" class="btn btn-ghost btn-inline" style="margin-top:14px;">العودة للرئيسية</a>`}
+      ${number ? `<a href="/track-order/?n=${encodeURIComponent(number)}" class="btn btn-ghost btn-inline" style="margin-top:14px;">متابعة الطلب</a>` : `<a href="/" class="btn btn-ghost btn-inline" style="margin-top:14px;">العودة للرئيسية</a>`}
     </div>`);
 }
 
@@ -867,11 +943,11 @@ async function lookup(number, email) {
 }
 
 function renderTrack(prefNumber) {
-  setMeta("تتبع طلبك | اتقان", "تابع حالة طلبك ووافق على عرض السعر وأكمل السداد.");
+  setMeta("تتبع طلبك | اتقان", "تابع حالة طلبك ووافق على عرض السعر وأكمل السداد.", { noindex: true });
   const savedEmail = sessionStorage.getItem("itqan_last_email") || "";
   layout(`
     <div class="form-page wide">
-      <h2>تتبع طلبك</h2>
+      <h1 class="page-h1">تتبع طلبك</h1>
       <div class="sub">أدخل رقم الطلب والبريد الإلكتروني المستخدم عند الطلب</div>
       <form id="trackForm">
         <div class="form-row-2">

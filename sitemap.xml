@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://store.itqanbs.sa/</loc><lastmod>2026-11-22</lastmod><priority>1.0</priority></url>
+  <url><loc>https://store.itqanbs.sa/services/</loc><lastmod>2026-11-22</lastmod><priority>0.9</priority></url>
   <url><loc>https://store.itqanbs.sa/services/specialized-studies/</loc><lastmod>2026-11-22</lastmod><priority>0.9</priority></url>
   <url><loc>https://store.itqanbs.sa/services/advisory-studies/</loc><lastmod>2026-11-22</lastmod><priority>0.9</priority></url>
   <url><loc>https://store.itqanbs.sa/services/business-development-plans/</loc><lastmod>2026-11-22</lastmod><priority>0.9</priority></url>
   <url><loc>https://store.itqanbs.sa/services/custom-corporate-services/</loc><lastmod>2026-11-22</lastmod><priority>0.9</priority></url>
   <url><loc>https://store.itqanbs.sa/services/business-valuation/</loc><lastmod>2026-11-22</lastmod><priority>0.9</priority></url>
-  <url><loc>https://store.itqanbs.sa/services/</loc><lastmod>2026-11-22</lastmod><priority>0.9</priority></url>
   <url><loc>https://store.itqanbs.sa/stages/</loc><lastmod>2026-11-22</lastmod><priority>0.8</priority></url>
+  <url><loc>https://store.itqanbs.sa/how-it-works/</loc><lastmod>2026-11-22</lastmod><priority>0.6</priority></url>
   <url><loc>https://store.itqanbs.sa/faq/</loc><lastmod>2026-11-22</lastmod><priority>0.7</priority></url>
   <url><loc>https://store.itqanbs.sa/about/</loc><lastmod>2026-11-22</lastmod><priority>0.6</priority></url>
+  <url><loc>https://store.itqanbs.sa/contact/</loc><lastmod>2026-11-22</lastmod><priority>0.5</priority></url>
+  <url><loc>https://store.itqanbs.sa/request/</loc><lastmod>2026-11-22</lastmod><priority>0.6</priority></url>
 </urlset>
