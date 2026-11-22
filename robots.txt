@@ -2,9 +2,9 @@ User-agent: *
 Allow: /
 Disallow: /admin.html
 Disallow: /cdn-cgi/
-Disallow: /cart/
-Disallow: /track-order/
-Disallow: /done/
+Disallow: /cart
+Disallow: /track-order
+Disallow: /done
 
 # أدوات الذكاء الاصطناعي ومحركات الإجابة — مسموح لها بقراءة الموقع
 User-agent: GPTBot

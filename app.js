@@ -209,10 +209,10 @@ const LOAD_ERR = `<div class="notice error">تعذّر تحميل المحتوى
 // خطوات العمل — مصدر واحد تستخدمه الرئيسية وصفحة "كيف نعمل"
 const STEPS_HTML = `
   <div class="steps steps-line">
-    <div class="step"><div class="num">١</div><h4>اختر الخدمة</h4><p>تصفّح الخدمات وأضف ما يناسبك لقائمة طلبك، أو اطلب عرض سعر مباشرة.</p></div>
-    <div class="step"><div class="num">٢</div><h4>أرسل بيانات مشروعك</h4><p>عرّفنا بمشروعك وهدفك من الخدمة.</p></div>
-    <div class="step"><div class="num">٣</div><h4>يصلك عرض سعر واضح</h4><p>نتواصل معك لفهم النطاق، ثم يصلك عرض سعر قبل أي التزام.</p></div>
-    <div class="step"><div class="num">٤</div><h4>تستلم المخرجات</h4><p>بعد اعتماد السداد يبدأ التنفيذ وتستلم المخرجات إلكترونيًا.</p></div>
+    <div class="step"><div class="num">١</div><h3>اختر الخدمة</h3><p>تصفّح الخدمات وأضف ما يناسبك لقائمة طلبك، أو اطلب عرض سعر مباشرة.</p></div>
+    <div class="step"><div class="num">٢</div><h3>أرسل بيانات مشروعك</h3><p>عرّفنا بمشروعك وهدفك من الخدمة.</p></div>
+    <div class="step"><div class="num">٣</div><h3>يصلك عرض سعر واضح</h3><p>نتواصل معك لفهم النطاق، ثم يصلك عرض سعر قبل أي التزام.</p></div>
+    <div class="step"><div class="num">٤</div><h3>تستلم المخرجات</h3><p>بعد اعتماد السداد يبدأ التنفيذ وتستلم المخرجات إلكترونيًا.</p></div>
   </div>`;
 
 const faqHtml = () => `<div class="faq-section" id="faqSection">${FAQ.map((f, i) => `
@@ -458,8 +458,8 @@ function renderNotFound() {
 // ---------------- Home ----------------
 async function renderHome() {
   setMeta(
-    "دراسات الجدوى واستشارات الأعمال في السعودية | إتقان",
-    "دراسات متخصصة واستشارية، إعادة هيكلة، وخطط تطوير أعمال من اتقان لخدمات الأعمال. اطلب عرض سعر لمشروعك أو شركتك القائمة."
+    "دراسات الجدوى واستشارات الأعمال في السعودية | متجر إتقان",
+    "اطلب دراسات جدوى، خطط أعمال، إعادة هيكلة، وتقييم شركات في السعودية بعرض سعر واضح قبل أي التزام وسرية تامة."
   );
 
   layout(`
@@ -467,9 +467,9 @@ async function renderHome() {
       <div class="hero-pattern" aria-hidden="true"></div>
       <div class="wrap hero-grid">
         <div>
-          <h1 class="eyebrow eyebrow-light hero-kicker">دراسات الجدوى واستشارات الأعمال في السعودية</h1>
-          <p class="hero-title">قرارات أعمال أفضل<br><span class="hl">تبدأ بتحليل واضح</span></p>
-          <p>دراسات واستشارات تساعدك على فهم السوق، تقييم المشروع، وتحليل الجدوى قبل اتخاذ القرار.</p>
+          <p class="eyebrow eyebrow-light hero-kicker">دراسات الجدوى واستشارات الأعمال في السعودية</p>
+          <h1 class="hero-title">قرارات أعمال أفضل <br><span class="hl">تبدأ بتحليل واضح</span><span class="h1-tail"><span class="h1-sep"> | </span>دراسات جدوى واستشارات أعمال</span></h1>
+          <p>دراسات جدوى، خطط أعمال، واستشارات متخصصة تساعدك على فهم السوق السعودي، تقييم الفرص، وتقليل المخاطر قبل اتخاذ القرار.</p>
           <div class="hero-actions">
             <a href="/services/" class="btn btn-primary">تصفح الخدمات</a>
             <a href="/stages/" class="btn btn-outline-light">ابدأ حسب وضعك</a>
@@ -515,7 +515,7 @@ async function renderHome() {
     </div>
 
     <section class="cta-band">
-      <h2>هل لديك مشروع وتحتاج إلى صورة أوضح قبل اتخاذ القرار؟</h2>
+      <p class="cta-title">هل لديك مشروع وتحتاج إلى صورة أوضح قبل اتخاذ القرار؟</p>
       <p>اختر الخدمة المناسبة وابدأ طلبك.</p>
       <a href="/request/" class="btn btn-primary">اطلب عرض سعر</a>
     </section>
@@ -698,7 +698,7 @@ function renderHowItWorks() {
       <div class="section-heading"><div class="sh-text"><span class="eyebrow">أربع خطوات</span><h1 class="page-h1">كيف تحصل على الخدمة؟</h1></div></div>
       ${STEPS_HTML}
       <div class="cta-band" style="margin-top:12px;">
-        <h2>جاهز تبدأ؟</h2>
+        <p class="cta-title">جاهز تبدأ؟</p>
         <a href="/request/" class="btn btn-primary">اطلب عرض سعر</a>
       </div>
     </div>`);
@@ -712,10 +712,10 @@ function renderAbout() {
       <p class="service-lede">اتقان لخدمات الأعمال — شركة سعودية تأسست عام ${esc(SETTINGS.founded?.year || "2025")}، تقدّم دراسات واستشارات لأصحاب المشاريع الجديدة والشركات القائمة في السوق السعودي، بهدف مساعدتهم على اتخاذ قرارات أعمال مبنية على تحليل واضح لا على تخمين. ومن خدماتنا تقييم الشركات والشركات العائلية بحياد وسرية تامة.</p>
       ${(SETTINGS.crNumber || SETTINGS.vatNumber) ? `<p class="note-muted">${SETTINGS.crNumber ? `الرقم الوطني الموحد: ${esc(SETTINGS.crNumber)}` : ""}${SETTINGS.crNumber && SETTINGS.vatNumber ? " · " : ""}${SETTINGS.vatNumber ? `الرقم الضريبي: ${esc(SETTINGS.vatNumber)}` : ""}</p>` : ""}
       <div class="why-grid">
-        <div class="why-card"><div class="icon-badge">${ICONS["advisory-studies"]}</div><h4>تحليل عملي</h4><p>نركز على المعلومات التي تساعدك في اتخاذ القرار.</p></div>
-        <div class="why-card"><div class="icon-badge">${ICONS["map"]}</div><h4>فهم للسوق السعودي</h4><p>نراعي بيئة الأعمال والسوق في المملكة.</p></div>
-        <div class="why-card"><div class="icon-badge">${ICONS["specialized-studies"]}</div><h4>مخرجات واضحة</h4><p>الدراسة ليست مجرد صفحات؛ بل تحليل وتوصيات.</p></div>
-        <div class="why-card"><div class="icon-badge">${ICONS["custom-corporate-services"]}</div><h4>حلول حسب احتياج المشروع</h4><p>يمكن تخصيص الخدمة حسب طبيعة المشروع وهدف العميل.</p></div>
+        <div class="why-card"><div class="icon-badge">${ICONS["advisory-studies"]}</div><h3>تحليل عملي</h3><p>نركز على المعلومات التي تساعدك في اتخاذ القرار.</p></div>
+        <div class="why-card"><div class="icon-badge">${ICONS["map"]}</div><h3>فهم للسوق السعودي</h3><p>نراعي بيئة الأعمال والسوق في المملكة.</p></div>
+        <div class="why-card"><div class="icon-badge">${ICONS["specialized-studies"]}</div><h3>مخرجات واضحة</h3><p>الدراسة ليست مجرد صفحات؛ بل تحليل وتوصيات.</p></div>
+        <div class="why-card"><div class="icon-badge">${ICONS["custom-corporate-services"]}</div><h3>حلول حسب احتياج المشروع</h3><p>يمكن تخصيص الخدمة حسب طبيعة المشروع وهدف العميل.</p></div>
       </div>
       <div class="hero-actions">
         <a href="/services/" class="btn btn-primary">تصفح الخدمات</a>
