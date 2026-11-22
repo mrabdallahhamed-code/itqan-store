@@ -49,10 +49,13 @@
 .js .seo-fallback { display: none; }
 .sp-p { line-height: 2; font-size: 15.5px; color: var(--ink-soft); margin: 0; }
 .sp-faq h3 { font-family: var(--font-display); font-size: 16px; margin: 0 0 8px; }
-.hero h1 .h1-sub { display: block; font-size: .62em; font-weight: 600; margin-top: 10px; color: var(--parchment); }
 .pd-h { font-family: var(--font-display); font-size: 18px; margin: 0 0 14px; display: flex; align-items: center; gap: 10px; }
 .pd-h::before { content: ""; width: 4px; height: 18px; border-radius: 4px; background: var(--brass); }
 .buy-title { font-family: var(--font-display); font-weight: 700; font-size: 16px; margin: 0 0 14px; }
 .product-detail .sp-faq { margin: 10px 0; }
 .section-heading .page-h1, .form-page .page-h1 { font-family: var(--font-display); font-size: clamp(24px, 3vw, 32px); font-weight: 700; line-height: 1.45; margin: 6px 0 0; }
 .form-page .page-h1 { margin-bottom: 6px; }
+.hero .hero-kicker { font-size: 14px; font-weight: 600; line-height: 1.6; margin: 0; max-width: none; color: var(--brass-soft); }
+.hero .hero-title { font-family: var(--font-display); font-size: clamp(30px, 4.4vw, 46px); line-height: 1.45; font-weight: 700; color: var(--parchment); margin: 14px 0 18px; max-width: 640px; }
+.hero .hero-title .hl { color: var(--brass-soft); }
+@media (max-width: 780px) { .hero .hero-title { font-size: 29px; margin: 10px 0 12px; } .hero .hero-kicker { font-size: 13px; } }

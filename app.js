@@ -467,8 +467,8 @@ async function renderHome() {
       <div class="hero-pattern" aria-hidden="true"></div>
       <div class="wrap hero-grid">
         <div>
-          <span class="eyebrow eyebrow-light">اتقان لخدمات الأعمال</span>
-          <h1>دراسات الجدوى واستشارات الأعمال في السعودية<span class="h1-sub">قرارات أفضل <span class="hl">تبدأ بتحليل واضح</span></span></h1>
+          <h1 class="eyebrow eyebrow-light hero-kicker">دراسات الجدوى واستشارات الأعمال في السعودية</h1>
+          <p class="hero-title">قرارات أعمال أفضل<br><span class="hl">تبدأ بتحليل واضح</span></p>
           <p>دراسات واستشارات تساعدك على فهم السوق، تقييم المشروع، وتحليل الجدوى قبل اتخاذ القرار.</p>
           <div class="hero-actions">
             <a href="/services/" class="btn btn-primary">تصفح الخدمات</a>
