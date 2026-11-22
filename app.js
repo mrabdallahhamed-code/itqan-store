@@ -277,9 +277,14 @@ function layout(content) {
             <span class="cart-badge" id="cartCount" style="display:none;">0</span>
           </a>
         </nav>
-        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="القائمة">
-          <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round"/></svg>
-        </button>
+        <div class="m-actions">
+          <a class="m-wa" href="https://wa.me/${esc(CFG.whatsappSupportNumber)}" target="_blank" rel="noopener" aria-label="تواصل معنا عبر واتساب">
+            <svg viewBox="0 0 32 32" aria-hidden="true"><path fill="currentColor" d="M16 3C9.4 3 4 8.4 4 15c0 2.4.7 4.6 1.9 6.5L4 29l7.7-1.9c1.8 1 3.9 1.5 6.3 1.5 6.6 0 12-5.4 12-12S22.6 3 16 3zm0 21.8c-2 0-3.9-.6-5.5-1.6l-.4-.2-4.6 1.2 1.2-4.5-.3-.4C5.4 17.7 4.8 16.4 4.8 15c0-6.2 5-11.2 11.2-11.2S27.2 8.8 27.2 15 22.2 24.8 16 24.8zm6.1-8.4c-.3-.2-2-1-2.3-1.1-.3-.1-.5-.2-.8.2-.2.3-.9 1.1-1.1 1.3-.2.2-.4.2-.7.1-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-2-1.8-2.3-.2-.3 0-.5.1-.6.1-.1.3-.4.5-.5.2-.2.2-.3.3-.5.1-.2 0-.4 0-.6-.1-.2-.8-1.9-1.1-2.6-.3-.7-.6-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.3-1.2 1.1-1.2 2.8s1.2 3.3 1.4 3.5c.2.2 2.4 3.7 5.8 5.1.8.3 1.4.6 1.9.7.8.3 1.5.2 2.1.1.6-.1 2-.8 2.3-1.6.3-.8.3-1.4.2-1.6-.1-.1-.3-.2-.6-.4z"/></svg>
+          </a>
+          <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="فتح القائمة" aria-expanded="false" aria-controls="navLinks">
+            <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round"/></svg>
+          </button>
+        </div>
       </div>
     </header>
     <main>${content}</main>
@@ -344,8 +349,10 @@ function layout(content) {
   `;
   wireInstall();
   markActiveTab();
-  document.getElementById("mobileMenuBtn")?.addEventListener("click", () => {
-    document.getElementById("navLinks")?.classList.toggle("open");
+  document.getElementById("mobileMenuBtn")?.addEventListener("click", (e) => {
+    const open = document.getElementById("navLinks")?.classList.toggle("open");
+    e.currentTarget.setAttribute("aria-expanded", open ? "true" : "false");
+    document.body.classList.toggle("menu-open", !!open);
   });
   updateCartBadge();
 }
@@ -427,6 +434,7 @@ function route() {
   ["service-schema", "faq-schema"].forEach((id) => document.getElementById(id)?.remove());
   window.scrollTo(0, 0);
   document.getElementById("navLinks")?.classList.remove("open");
+  document.body.classList.remove("menu-open");
   const [page, arg] = parts;
   if (!page) return renderHome();
   if (page === "services") return arg ? renderService(arg) : renderServices();

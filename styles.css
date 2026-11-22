@@ -1119,3 +1119,71 @@ html { -webkit-tap-highlight-color: transparent; }
   .install-banner { display: none !important; }
   body { overscroll-behavior-y: none; }
 }
+
+/* ============================================================
+   تحسين تجربة الجوال — الهيدر، القائمة، المسافات، الخطوط، واتساب
+   ============================================================ */
+.m-actions { display: none; }
+@media (max-width: 780px) {
+  /* الهيدر: نظيف — الشعار والاسم + واتساب + القائمة */
+  .site-header { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--ink); }
+  .site-header .wrap { padding-top: 8px; padding-bottom: 8px; gap: 10px; }
+  .brand { gap: 10px; min-width: 0; }
+  .brand .logo-chip { padding: 4px 8px; border-radius: 9px; }
+  .brand img { height: 30px; width: auto; }
+  .brand .brand-text { font-size: 16.5px; white-space: nowrap; }
+  .brand .brand-text small { display: none; }
+  .m-actions { display: flex; align-items: center; gap: 8px; }
+  .m-wa, .mobile-menu-btn { width: 42px; height: 42px; border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(201,166,107,.35); background: rgba(255,255,255,.04); }
+  .m-wa { color: #25D366; }
+  .m-wa svg { width: 22px; height: 22px; }
+  .mobile-menu-btn { display: inline-flex; padding: 0; }
+
+  /* القائمة المنسدلة: لوحة كاملة تحت الهيدر */
+  .nav-links { position: fixed; left: 0; right: 0; top: calc(58px + env(safe-area-inset-top)); bottom: 0;
+    background: var(--ink); padding: 12px 18px calc(96px + env(safe-area-inset-bottom)); overflow-y: auto;
+    border-top: 1px solid rgba(201,166,107,.25); gap: 2px; }
+  .nav-links a:not(.btn):not(.cart-link) { display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 6px; font-size: 16.5px; font-family: var(--font-display); font-weight: 600; opacity: 1;
+    border-bottom: 1px solid rgba(255,255,255,.07); border-radius: 0; }
+  .nav-links a:not(.btn):not(.cart-link)::after { content: "‹"; color: var(--brass-soft); font-size: 20px; line-height: 1; }
+  .nav-links .btn { display: block; margin: 18px 0 0; width: 100%; padding: 15px; font-size: 16px; }
+  body.menu-open { overflow: hidden; }
+
+  /* زر واتساب العائم: يُخفى على الجوال وينتقل للهيدر حتى لا يغطي أي محتوى */
+  .wa-float { display: none; }
+
+  /* خطوط أوضح */
+  body { font-size: 15.5px; }
+  .eyebrow { font-size: 13px; }
+  .hero .hero-kicker { font-size: 13.5px; }
+  .hero .hero-title .h1-tail { font-size: 15px; }
+  .hero p { font-size: 15.5px; line-height: 1.95; }
+  .note-muted { font-size: 14.5px; }
+  .shop-tile-body .service-row-desc { font-size: 14px; line-height: 1.85; }
+  .pkg-step, .stage-hint { font-size: 13px; }
+  .stage-svc { font-size: 14.5px; }
+  .tabbar a { font-size: 11.5px; }
+  .faq-q { font-size: 15.5px; line-height: 1.7; }
+  .faq-a p { font-size: 15px; }
+  .footer-social a { font-size: 13px; }
+  .step p, .why-card p { font-size: 14.5px; }
+
+  /* مسافات وحواف البطاقات */
+  .section-heading { margin: 44px 0 16px; align-items: center; }
+  .shop-grid { gap: 14px; }
+  .shop-tile { border-radius: 18px; }
+  .shop-tile-actions { margin: 12px 16px 16px; padding-top: 14px; gap: 12px; }
+  .add-cart-btn { padding: 10px 16px; font-size: 13.5px; min-height: 42px; }
+  .shop-tile-cta { font-size: 14px; padding: 10px 0; }
+  .pkg-grid { gap: 12px; padding: 14px 18px 16px; }
+  .pkg-card { flex-basis: 88%; border-radius: 20px; padding: 22px 18px; }
+  .pkg-card .stage-btn { padding: 14px; }
+  .get-panel { padding: 16px 18px; border-radius: 18px; }
+  .get-item { padding: 12px 0; font-size: 15px; }
+  .step { border-radius: 16px; padding: 18px 16px; }
+  .faq-item { border-radius: 14px; }
+  .faq-q { padding: 16px 14px; }
+  .trust-bar { padding: 16px; border-radius: 14px; }
+  .hero-actions .btn { min-height: 50px; }
+}

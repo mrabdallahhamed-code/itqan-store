@@ -64,3 +64,7 @@
 .why-card h3 { font-family: var(--font-display); font-size: 16.5px; font-weight: 700; margin: 4px 0 8px; color: var(--ink); }
 .cta-band .cta-title { font-family: var(--font-display); font-weight: 700; font-size: clamp(22px, 3vw, 30px); line-height: 1.5; max-width: 26ch; margin: 0 auto 12px; color: var(--parchment); }
 .hero .hero-title .h1-sep { color: var(--brass-soft); }
+@media (max-width: 780px) {
+  .hero .hero-title .h1-tail { font-size: 15px; margin-top: 10px; }
+  .section-heading .count { font-size: 13.5px; padding: 8px 14px; }
+}
