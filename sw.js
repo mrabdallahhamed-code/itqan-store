@@ -1,7 +1,7 @@
 // Service Worker — يجعل المتجر قابلًا للتثبيت ويسرّع فتحه
 // عند أي تحديث للموقع غيّر رقم الإصدار هنا ليحصل الزوار على النسخة الجديدة
 const VERSION = "itqan-v3";
-const SHELL = ["/", "/styles.css", "/static-pages.css", "/app.js", "/seo-content.js", "/config.js", "/site-settings.js", "/logo.png", "/logo-96.webp", "/icon-192.png"];
+const SHELL = ["/", "/logo.png", "/logo-96.webp", "/icon-192.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));

@@ -42,3 +42,4 @@
 - النصوص الإضافية لكل خدمة (عنوان SEO، أقسام، أسئلة) في `tools/content.json` → يُولَّد منها `seo-content.js`.
 - `tools/shell.html` هو قالب التطبيق؛ أي تعديل على `<head>` يتم فيه ثم يُعاد البناء.
 - `robots.txt` يمنع أرشفة `/cart/` و`/track-order/` و`/done/`، و`sitemap.xml` يُولَّد تلقائيًا.
+- عند تعديل app.js أو styles.css: غيّر رقم `?v=` في `tools/shell.html` ثم أعد البناء، حتى يحصل الزوار على النسخة الجديدة فورًا.
